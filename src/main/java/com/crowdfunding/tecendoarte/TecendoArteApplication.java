@@ -1,13 +1,13 @@
-package com.crowdfunding.tecendearte;
+package com.crowdfunding.tecendoarte;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class TecendearteApplication {
+public class TecendoArteApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TecendearteApplication.class, args);
+		SpringApplication.run(TecendoArteApplication.class, args);
 	}
 
 }
