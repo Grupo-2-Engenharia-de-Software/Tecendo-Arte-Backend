@@ -2,7 +2,7 @@ package com.crowdfunding.tecendoarte.dto.ArtistaDTO;
 
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 @Data
@@ -20,7 +20,7 @@ public class ArtistaResponseDTO {
     private String email;
 
     @JsonProperty("tiposArte")
-    @NotBlank(message = "Tipos de Arte Obrigatorios!")
-    private List<String> tiposArte;
+    @NotEmpty(message = "Tipos de Arte Obrigatorios!")
+    private List<@NotBlank String> tiposArte;
     
 }
