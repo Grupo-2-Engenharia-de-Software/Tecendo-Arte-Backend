@@ -4,7 +4,7 @@ import com.crowdfunding.tecendoarte.models.enums.TipoConta;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
-import java.util.ArrayList; // se inicializar as listas
+import java.util.ArrayList;
 import com.crowdfunding.tecendoarte.models.Interacao;
 import com.crowdfunding.tecendoarte.models.Denuncia;
 import com.crowdfunding.tecendoarte.models.Comentario;

@@ -34,7 +34,7 @@ public class ContaController {
         }
     }
 
-@PutMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> atualizarConta(@PathVariable Long id, @Valid @RequestBody ContaRequestDTO contaDTO) {
         try {
             ContaResponseDTO response = contaService.atualizarConta(id, contaDTO);
