@@ -1,4 +1,4 @@
-package com.crowdfunding.tecendoarte;
+package com.crowdfunding.tecendoarte.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
