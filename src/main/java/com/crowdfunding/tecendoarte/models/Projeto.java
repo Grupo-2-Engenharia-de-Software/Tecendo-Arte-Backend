@@ -49,14 +49,14 @@ public class Projeto {
     @Column(name = "descricao_recompensa", columnDefinition = "TEXT")
     private String descricaoRecompensa;
     
-    //Verificar Implementação de Usuário administrador
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "id_validator")
-    // private Administrador validator;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_validator")
+    private Administrador validator;
 
-    //Verificar como vamos implementar imagens
-    // @OneToMany(mappedBy = "projeto", cascade = CascadeType.ALL, orphanRemoval = true)
-    // private List<Imagem> imagens = new ArrayList<>();
+    //Iremos guardar a URL da imagem
+    @OneToMany(mappedBy = "projeto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Imagem> imagens = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_arte", nullable = false)

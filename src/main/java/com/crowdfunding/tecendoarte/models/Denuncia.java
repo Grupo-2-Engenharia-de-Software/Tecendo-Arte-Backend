@@ -28,9 +28,18 @@ public class Denuncia {
     private StatusDenuncia statusDenuncia;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_adm")
+    private Administrador administrador;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "conta_id", nullable = false)
     private Conta autor;
 
     @Column(nullable = false)
     private Long idAlvo;
+  
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "projeto_id")
+    private Projeto projeto;
+
 }
