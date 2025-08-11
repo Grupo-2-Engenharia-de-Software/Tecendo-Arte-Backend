@@ -69,4 +69,18 @@ public class ArtistaController {
         }
     }
 
+    @DeleteMapping("/{nome}")
+    public ResponseEntity<?> deletar(@Valid @PathVariable String nome) {
+        try {
+            this.artistaService.deletarArtista(nome);
+            return ResponseEntity
+                    .noContent()
+                    .build();
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ex.getMessage());
+        }
+    }
+
 }

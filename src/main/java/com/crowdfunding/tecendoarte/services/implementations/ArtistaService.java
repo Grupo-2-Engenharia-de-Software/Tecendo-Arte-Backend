@@ -119,4 +119,11 @@ public class ArtistaService implements ArtistaServiceInterface {
         return this.artistaRepository.save(artista);
     }
 
+    public void deletarArtista(String nome) {
+        Artista artista = this.artistaRepository.findByNome(nome)
+                .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado com nome: " + nome));
+
+        this.artistaRepository.delete(artista);
+    }
+
 }
