@@ -22,14 +22,11 @@ public class ProjetoService implements ProjetoServiceInterface {
     private final ProjetoRepository projetoRepository;
     private final ArtistaRepository artistaRepository;
 
-    @Override
     @Transactional
-    public ProjetoResponseDTO cadastraProjeto(ProjetoRequestDTO dto) {
-        
-        Artista artista = artistaRepository.findById(dto.getIdArtista())
+    public ProjetoResponseDTO cadastraProjeto(ProjetoRequestDTO dto, Long idArtistaAutenticado) {
+        Artista artista = artistaRepository.findById(idArtistaAutenticado)
                 .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
 
-        
         if (dto.getTitulo() == null || dto.getTitulo().isBlank()) {
             throw new IllegalArgumentException("Título do projeto é obrigatório.");
         }
@@ -65,7 +62,73 @@ public class ProjetoService implements ProjetoServiceInterface {
                 .dataCriacao(projeto.getDataCriacao())
                 .status(projeto.getStatus())
                 .tipoArte(projeto.getTipoArte())
-                .nomeArtista(projeto.getArtista() != null ? projeto.getArtista().getNome() : null)
+                .nomeArtista(artista.getNome())
+                .build();
+    }
+
+    @Transactional
+    public ProjetoResponseDTO deletaProjeto(Long idProjeto, Long idArtistaAutenticado) {
+        Artista artista = artistaRepository.findById(idArtistaAutenticado)
+                .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
+
+        Projeto projeto = projetoRepository.findById(idProjeto)
+                .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado."));
+
+        if (!projeto.getArtista().getId().equals(idArtistaAutenticado)) {
+            throw new IllegalArgumentException("Você só pode deletar projetos do seu próprio usuário.");
+        }
+
+        projetoRepository.delete(projeto);
+
+        return ProjetoResponseDTO.builder()
+                .idProjeto(projeto.getIdProjeto())
+                .titulo(projeto.getTitulo())
+                .descricaoProjeto(projeto.getDescricaoProjeto())
+                .meta(projeto.getMeta())
+                .valorArrecadado(projeto.getValorArrecadado())
+                .dataCriacao(projeto.getDataCriacao())
+                .status(projeto.getStatus())
+                .tipoArte(projeto.getTipoArte())
+                .nomeArtista(artista.getNome())
+                .build();
+    }
+
+    @Transactional
+    public ProjetoResponseDTO atualizaProjeto(Long idProjeto, ProjetoRequestDTO dto, Long idArtistaAutenticado) {
+        Artista artista = artistaRepository.findById(idArtistaAutenticado)
+                .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
+
+        Projeto projeto = projetoRepository.findById(idProjeto)
+                .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado."));
+
+        if (!projeto.getArtista().getId().equals(idArtistaAutenticado)) {
+            throw new IllegalArgumentException("Você só pode atualizar projetos do seu próprio usuário.");
+        }
+        if (dto.getTitulo() != null && !dto.getTitulo().isBlank()) {
+            projeto.setTitulo(dto.getTitulo());
+        }
+        if (dto.getDescricaoProjeto() != null && !dto.getDescricaoProjeto().isBlank()) {
+            projeto.setDescricaoProjeto(dto.getDescricaoProjeto());
+        }
+        if (dto.getMeta() != null && dto.getMeta() > 0) {
+            projeto.setMeta(dto.getMeta());
+        }
+        if (dto.getTipoArte() != null) {
+            projeto.setTipoArte(dto.getTipoArte());
+        }
+
+        projeto = projetoRepository.save(projeto);
+
+        return ProjetoResponseDTO.builder()
+                .idProjeto(projeto.getIdProjeto())
+                .titulo(projeto.getTitulo())
+                .descricaoProjeto(projeto.getDescricaoProjeto())
+                .meta(projeto.getMeta())
+                .valorArrecadado(projeto.getValorArrecadado())
+                .dataCriacao(projeto.getDataCriacao())
+                .status(projeto.getStatus())
+                .tipoArte(projeto.getTipoArte())
+                .nomeArtista(artista.getNome())
                 .build();
     }
 }

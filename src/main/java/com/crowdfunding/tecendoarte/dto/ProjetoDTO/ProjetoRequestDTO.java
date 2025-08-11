@@ -21,7 +21,4 @@ public class ProjetoRequestDTO {
 
     @JsonProperty("tipoArte")
     private TipoArte tipoArte;
-
-    @JsonProperty("idArtista")
-    private Long idArtista;
 }
