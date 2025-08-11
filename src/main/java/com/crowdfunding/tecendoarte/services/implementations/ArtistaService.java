@@ -6,6 +6,7 @@ import com.crowdfunding.tecendoarte.models.Artista;
 import com.crowdfunding.tecendoarte.models.enums.TipoArte;
 import com.crowdfunding.tecendoarte.repositories.ArtistaRepository;
 import com.crowdfunding.tecendoarte.services.interfaces.ArtistaServiceInterface;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,5 +49,17 @@ public class ArtistaService implements ArtistaServiceInterface {
 
         return this.artistaRepository.save(artista);
     }
+
+    public ArtistaResponseDTO consultarArtista(String nome) {
+        Artista artista = this.artistaRepository.findByNome(nome)
+                .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado com nome: " + nome));
+        return ArtistaResponseDTO.builder()
+                .nome(artista.getNome())
+                .email(artista.getEmail())
+                .tiposArte(artista.getTiposArte().stream()
+                .map(TipoArte::name)
+                .collect(Collectors.toList()))
+                .build();
+    };
     
 }

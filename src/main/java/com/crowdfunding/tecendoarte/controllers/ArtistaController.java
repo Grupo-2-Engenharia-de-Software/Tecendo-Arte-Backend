@@ -3,6 +3,7 @@ package com.crowdfunding.tecendoarte.controllers;
 import org.springframework.web.bind.annotation.*;
 import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaRequestDTO;
 import com.crowdfunding.tecendoarte.services.implementations.ArtistaService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
 
@@ -28,6 +29,18 @@ public class ArtistaController {
         } catch (Exception ex) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ex.getMessage());
+        }
+    }
+
+    @GetMapping("/{nome}")
+    public ResponseEntity<?> consultar(@Valid @PathVariable String nome) {
+        try {
+            return ResponseEntity
+                    .ok(artistaService.consultarArtista(nome));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
                     .body(ex.getMessage());
         }
     }

@@ -7,5 +7,6 @@ import com.crowdfunding.tecendoarte.models.Artista;
 public interface ArtistaRepository extends JpaRepository<Artista, Long> {
     
     Optional<Artista> findByEmail(String email);
+    Optional<Artista> findByNome(String nome);
 
 }
