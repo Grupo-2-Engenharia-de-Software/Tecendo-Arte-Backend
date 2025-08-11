@@ -10,5 +10,6 @@ public interface ArtistaServiceInterface {
     public Artista cadastrarArtista(ArtistaRequestDTO dto);
     public ArtistaResponseDTO consultarArtista(String nome);
     public List<ArtistaResponseDTO> listarArtistas();
+    public Artista atualizarArtista(String nome, ArtistaRequestDTO dto);
     
 }

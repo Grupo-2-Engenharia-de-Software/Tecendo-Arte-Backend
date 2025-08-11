@@ -78,8 +78,45 @@ public class ArtistaService implements ArtistaServiceInterface {
         if (artistas.isEmpty()) {
             throw new EntityNotFoundException("Nenhum artista encontrado.");
         }
-        
+
         return artistas;
     }
-    
+
+    public Artista atualizarArtista(String nome, ArtistaRequestDTO dto) {
+        Artista artista = this.artistaRepository.findByNome(nome)
+            .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado com nome: " + nome));
+
+        if (dto.getNome() != null && !dto.getNome().isBlank()) {
+            artista.setNome(dto.getNome());
+        }
+
+        if (dto.getEmail() != null && !dto.getEmail().isBlank() && !dto.getEmail().equals(artista.getEmail())) {
+            boolean emailRepetido = this.artistaRepository.existsByEmail(dto.getEmail());
+            if (emailRepetido) {
+                throw new IllegalArgumentException("O e-mail informado já está em uso.");
+            }
+            artista.setEmail(dto.getEmail());
+        }
+
+        if (!dto.getSenha().equals(dto.getConfirmacaoSenha())) {
+            throw new IllegalArgumentException("As senhas não coincidem. Tente novamente.");
+        }
+
+        List<TipoArte> tiposArte = dto.getTiposArte().stream()
+                .map(tipo -> {
+                    try {
+                        return TipoArte.valueOf(tipo.toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        throw new RuntimeException("Tipo de arte inválido: " + tipo);
+                    }
+                })
+                .collect(Collectors.toList());
+
+        if (tiposArte != null && !tiposArte.isEmpty()) {
+            artista.setTiposArte(tiposArte);
+        }
+
+        return this.artistaRepository.save(artista);
+    }
+
 }

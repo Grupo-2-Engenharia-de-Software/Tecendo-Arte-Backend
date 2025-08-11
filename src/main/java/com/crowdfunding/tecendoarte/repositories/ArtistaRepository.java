@@ -10,5 +10,6 @@ public interface ArtistaRepository extends JpaRepository<Artista, Long> {
     Optional<Artista> findByEmail(String email);
     Optional<Artista> findByNome(String nome);
     List<Artista> findAll();
+    Boolean existsByEmail(String email);
 
 }

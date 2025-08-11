@@ -48,11 +48,24 @@ public class ArtistaController {
     @GetMapping
     public ResponseEntity<?> listar() {
         try {
-            return ResponseEntity.ok(this.artistaService.listarArtistas());
+            return ResponseEntity
+                    .ok(this.artistaService.listarArtistas());
         } catch (Exception ex) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(null);
+        }
+    }
+
+    @PutMapping("/{nome}")
+    public ResponseEntity<?> atualizar(@Valid @PathVariable String nome, @RequestBody ArtistaRequestDTO dto) {
+        try {
+            return ResponseEntity
+                    .ok(this.artistaService.atualizarArtista(nome, dto));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(ex.getMessage());
         }
     }
 
