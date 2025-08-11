@@ -37,11 +37,22 @@ public class ArtistaController {
     public ResponseEntity<?> consultar(@Valid @PathVariable String nome) {
         try {
             return ResponseEntity
-                    .ok(artistaService.consultarArtista(nome));
+                    .ok(this.artistaService.consultarArtista(nome));
         } catch (EntityNotFoundException ex) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(ex.getMessage());
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<?> listar() {
+        try {
+            return ResponseEntity.ok(this.artistaService.listarArtistas());
+        } catch (Exception ex) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
         }
     }
 

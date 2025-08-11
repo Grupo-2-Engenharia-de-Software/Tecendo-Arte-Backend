@@ -57,9 +57,29 @@ public class ArtistaService implements ArtistaServiceInterface {
                 .nome(artista.getNome())
                 .email(artista.getEmail())
                 .tiposArte(artista.getTiposArte().stream()
-                .map(TipoArte::name)
-                .collect(Collectors.toList()))
+                    .map(TipoArte::name)
+                    .collect(Collectors.toList()))
                 .build();
     };
+
+    public List<ArtistaResponseDTO> listarArtistas() {
+        List<ArtistaResponseDTO> artistas = this.artistaRepository.findAll()
+                .stream()
+                .map(artista -> ArtistaResponseDTO.builder()
+                .nome(artista.getNome())
+                .email(artista.getEmail())
+                .tiposArte(artista.getTiposArte().stream()
+                    .map(TipoArte::name)
+                    .collect(Collectors.toList()))
+                .build()
+                )
+                .collect(Collectors.toList());
+
+        if (artistas.isEmpty()) {
+            throw new EntityNotFoundException("Nenhum artista encontrado.");
+        }
+        
+        return artistas;
+    }
     
 }
