@@ -1,5 +1,4 @@
 # Tecendo-Arte-Backend
-# Tecendo Arte - Backend
 
 Este é o repositório backend do projeto **Tecendo Arte**, uma plataforma de financiamento coletivo voltada para artistas plásticos e visuais, desenvolvida como parte da disciplina de **Engenharia de Software** (UFCG - 2025.2).
 
