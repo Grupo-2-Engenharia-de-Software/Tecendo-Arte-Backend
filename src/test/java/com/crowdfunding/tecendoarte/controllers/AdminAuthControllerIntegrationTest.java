@@ -74,7 +74,9 @@ class AdminAuthControllerIntegrationTest {
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.email").value("admin@example.com"))
                 .andExpect(jsonPath("$.nome").value("Admin"))
-                .andExpect(jsonPath("$.permissoes").isArray());
+                .andExpect(jsonPath("$.permissoes").isArray())
+                .andExpect(jsonPath("$.token").exists())
+                .andReturn();
     }
 
     @Test

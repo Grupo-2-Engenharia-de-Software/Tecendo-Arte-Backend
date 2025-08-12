@@ -1,5 +1,6 @@
 package com.crowdfunding.tecendoarte.services.implementations;
 
+import com.crowdfunding.tecendoarte.config.JwtUtil;
 import com.crowdfunding.tecendoarte.dto.AdministradorDTO.AdminLoginRequestDTO;
 import com.crowdfunding.tecendoarte.dto.AdministradorDTO.AdminLoginResponseDTO;
 import com.crowdfunding.tecendoarte.models.Administrador;
@@ -16,6 +17,7 @@ public class AdministradorAuthService implements AdministradorAuthServiceInterfa
 
     private final AdministradorRepository administradorRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @Override
     public AdminLoginResponseDTO login(AdminLoginRequestDTO request) {
@@ -26,11 +28,14 @@ public class AdministradorAuthService implements AdministradorAuthServiceInterfa
             throw new IllegalArgumentException("Senha inválida.");
         }
 
+        String token = jwtUtil.generateTokenForAdmin(administrador.getId(), administrador.getEmail());
+
         return AdminLoginResponseDTO.builder()
                 .id(administrador.getId())
                 .nome(administrador.getNome())
                 .email(administrador.getEmail())
                 .permissoes(administrador.getPermissoes())
+                .token(token)
                 .build();
     }
 }

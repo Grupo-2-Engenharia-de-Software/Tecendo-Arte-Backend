@@ -17,4 +17,5 @@ public class AdminLoginResponseDTO {
     private String nome;
     private String email;
     private Set<PermissaoAdministrador> permissoes;
+    private String token;
 }
