@@ -15,6 +15,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.security.test.context.support.WithMockUser;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 import java.util.Map;
 
@@ -25,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class AdminDenunciasControllerIntegrationTest {
+class DenunciasControllerIntegrationTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -41,10 +43,26 @@ class AdminDenunciasControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         denunciaRepository.deleteAll();
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                .apply(springSecurity())
+                .build();
     }
 
     @Test
+    void deveRetornar403SemAutenticacao() throws Exception {
+        mockMvc.perform(get("/api/admin/denuncias").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void deveRetornar403SemRoleAdmin() throws Exception {
+        mockMvc.perform(get("/api/admin/denuncias").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
     void deveListarDenunciasPendentes() throws Exception {
         Denuncia d1 = Denuncia.builder()
                 .tipo(TipoDenuncia.PROJETO)
@@ -72,6 +90,7 @@ class AdminDenunciasControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deveAnalisarDenunciaComoProcedente() throws Exception {
         Denuncia d = Denuncia.builder()
                 .tipo(TipoDenuncia.ARTISTA)
@@ -96,6 +115,7 @@ class AdminDenunciasControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deveAnalisarDenunciaComoImprocedente() throws Exception {
         Denuncia d = Denuncia.builder()
                 .tipo(TipoDenuncia.PROJETO)
@@ -120,6 +140,7 @@ class AdminDenunciasControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deveFalharAoAnalisarComIdInexistente() throws Exception {
         String payload = objectMapper.writeValueAsString(Map.of("resultado", "PROCEDENTE"));
 
@@ -132,6 +153,7 @@ class AdminDenunciasControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deveFalharAoAnalisarSemResultado() throws Exception {
         Denuncia d = Denuncia.builder()
                 .tipo(TipoDenuncia.USUARIO)
@@ -153,6 +175,7 @@ class AdminDenunciasControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deveFalharAoReanalisarDenuncia() throws Exception {
         Denuncia d = Denuncia.builder()
                 .tipo(TipoDenuncia.PROJETO)
@@ -177,6 +200,7 @@ class AdminDenunciasControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deveFalharAoAnalisarComResultadoPendente() throws Exception {
         Denuncia d = Denuncia.builder()
                 .tipo(TipoDenuncia.USUARIO)

@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(value = "/api/admin/denuncias", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
-public class AdminDenunciasController {
+public class DenunciasController {
 
     private final DenunciaServiceInterface denunciaService;
 
