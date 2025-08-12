@@ -1,7 +1,6 @@
 package com.crowdfunding.tecendoarte.controllers;
 
 import com.crowdfunding.tecendoarte.models.Administrador;
-import com.crowdfunding.tecendoarte.models.enums.PermissaoAdministrador;
 import com.crowdfunding.tecendoarte.repositories.AdministradorRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +16,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Map;
-import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -60,7 +58,6 @@ class AdminAuthControllerIntegrationTest {
                 .nome("Admin")
                 .email("admin@example.com")
                 .senha(passwordEncoder.encode("secret"))
-                .permissoes(Set.of(PermissaoAdministrador.GERENCIAR_USUARIOS))
                 .build();
         administradorRepository.save(admin);
 
@@ -74,7 +71,6 @@ class AdminAuthControllerIntegrationTest {
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.email").value("admin@example.com"))
                 .andExpect(jsonPath("$.nome").value("Admin"))
-                .andExpect(jsonPath("$.permissoes").isArray())
                 .andExpect(jsonPath("$.token").exists())
                 .andReturn();
     }
@@ -97,7 +93,6 @@ class AdminAuthControllerIntegrationTest {
                 .nome("Admin")
                 .email("admin@example.com")
                 .senha(passwordEncoder.encode("secret"))
-                .permissoes(Set.of(PermissaoAdministrador.GERENCIAR_USUARIOS))
                 .build();
         administradorRepository.save(admin);
 
