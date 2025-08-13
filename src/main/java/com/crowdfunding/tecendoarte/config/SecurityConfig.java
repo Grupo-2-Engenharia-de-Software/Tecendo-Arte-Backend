@@ -2,6 +2,7 @@ package com.crowdfunding.tecendoarte.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -24,6 +25,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/conta/**", "/public/**").permitAll()
+                .requestMatchers("/projetos/**").permitAll()
+                .requestMatchers("/api/artistas").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();

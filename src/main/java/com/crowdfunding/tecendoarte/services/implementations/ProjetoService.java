@@ -27,19 +27,6 @@ public class ProjetoService implements ProjetoServiceInterface {
         Artista artista = artistaRepository.findById(idArtistaAutenticado)
                 .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
 
-        if (dto.getTitulo() == null || dto.getTitulo().isBlank()) {
-            throw new IllegalArgumentException("Título do projeto é obrigatório.");
-        }
-        if (dto.getDescricaoProjeto() == null || dto.getDescricaoProjeto().isBlank()) {
-            throw new IllegalArgumentException("Descrição do projeto é obrigatória.");
-        }
-        if (dto.getMeta() == null || dto.getMeta() <= 0) {
-            throw new IllegalArgumentException("Meta do projeto deve ser maior que zero.");
-        }
-        if (dto.getTipoArte() == null) {
-            throw new IllegalArgumentException("Tipo de arte é obrigatório.");
-        }
-
         Projeto projeto = Projeto.builder()
                 .titulo(dto.getTitulo())
                 .descricaoProjeto(dto.getDescricaoProjeto())
@@ -52,73 +39,50 @@ public class ProjetoService implements ProjetoServiceInterface {
                 .build();
 
         projeto = projetoRepository.save(projeto);
-
-        return ProjetoResponseDTO.builder()
-                .idProjeto(projeto.getIdProjeto())
-                .titulo(projeto.getTitulo())
-                .descricaoProjeto(projeto.getDescricaoProjeto())
-                .meta(projeto.getMeta())
-                .valorArrecadado(projeto.getValorArrecadado())
-                .dataCriacao(projeto.getDataCriacao())
-                .status(projeto.getStatus())
-                .tipoArte(projeto.getTipoArte())
-                .nomeArtista(artista.getNome())
-                .build();
+        return toResponseDTO(projeto);
     }
 
     @Transactional
     public ProjetoResponseDTO deletaProjeto(Long idProjeto, Long idArtistaAutenticado) {
-        Artista artista = artistaRepository.findById(idArtistaAutenticado)
-                .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
-
-        Projeto projeto = projetoRepository.findById(idProjeto)
-                .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado."));
+        Projeto projeto = buscarProjetoPorId(idProjeto);
 
         if (!projeto.getArtista().getId().equals(idArtistaAutenticado)) {
             throw new IllegalArgumentException("Você só pode deletar projetos do seu próprio usuário.");
         }
 
         projetoRepository.delete(projeto);
-
-        return ProjetoResponseDTO.builder()
-                .idProjeto(projeto.getIdProjeto())
-                .titulo(projeto.getTitulo())
-                .descricaoProjeto(projeto.getDescricaoProjeto())
-                .meta(projeto.getMeta())
-                .valorArrecadado(projeto.getValorArrecadado())
-                .dataCriacao(projeto.getDataCriacao())
-                .status(projeto.getStatus())
-                .tipoArte(projeto.getTipoArte())
-                .nomeArtista(artista.getNome())
-                .build();
+        return toResponseDTO(projeto);
     }
 
     @Transactional
     public ProjetoResponseDTO atualizaProjeto(Long idProjeto, ProjetoRequestDTO dto, Long idArtistaAutenticado) {
-        Artista artista = artistaRepository.findById(idArtistaAutenticado)
-                .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
-
-        Projeto projeto = projetoRepository.findById(idProjeto)
-                .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado."));
+        Projeto projeto = buscarProjetoPorId(idProjeto);
 
         if (!projeto.getArtista().getId().equals(idArtistaAutenticado)) {
             throw new IllegalArgumentException("Você só pode atualizar projetos do seu próprio usuário.");
         }
-        if (dto.getTitulo() != null && !dto.getTitulo().isBlank()) {
-            projeto.setTitulo(dto.getTitulo());
-        }
-        if (dto.getDescricaoProjeto() != null && !dto.getDescricaoProjeto().isBlank()) {
-            projeto.setDescricaoProjeto(dto.getDescricaoProjeto());
-        }
-        if (dto.getMeta() != null && dto.getMeta() > 0) {
-            projeto.setMeta(dto.getMeta());
-        }
-        if (dto.getTipoArte() != null) {
-            projeto.setTipoArte(dto.getTipoArte());
-        }
+
+        projeto.setTitulo(dto.getTitulo());
+        projeto.setDescricaoProjeto(dto.getDescricaoProjeto());
+        projeto.setMeta(dto.getMeta());
+        projeto.setTipoArte(dto.getTipoArte());
 
         projeto = projetoRepository.save(projeto);
+        return toResponseDTO(projeto);
+    }
 
+    @Transactional(readOnly = true)
+    public ProjetoResponseDTO buscarPorId(Long idProjeto) {
+        Projeto projeto = buscarProjetoPorId(idProjeto);
+        return toResponseDTO(projeto);
+    }
+
+    private Projeto buscarProjetoPorId(Long idProjeto) {
+        return projetoRepository.findById(idProjeto)
+                .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado."));
+    }
+
+    private ProjetoResponseDTO toResponseDTO(Projeto projeto) {
         return ProjetoResponseDTO.builder()
                 .idProjeto(projeto.getIdProjeto())
                 .titulo(projeto.getTitulo())
@@ -128,7 +92,7 @@ public class ProjetoService implements ProjetoServiceInterface {
                 .dataCriacao(projeto.getDataCriacao())
                 .status(projeto.getStatus())
                 .tipoArte(projeto.getTipoArte())
-                .nomeArtista(artista.getNome())
+                .nomeArtista(projeto.getArtista().getNome())
                 .build();
     }
 }
