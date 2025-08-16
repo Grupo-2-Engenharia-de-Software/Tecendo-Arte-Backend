@@ -34,7 +34,6 @@ public class AdministradorAuthService implements AdministradorAuthServiceInterfa
                 .id(administrador.getId())
                 .nome(administrador.getNome())
                 .email(administrador.getEmail())
-                .permissoes(administrador.getPermissoes())
                 .token(token)
                 .build();
     }

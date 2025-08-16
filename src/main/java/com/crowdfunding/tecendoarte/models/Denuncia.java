@@ -25,7 +25,7 @@ public class Denuncia {
     @Column(nullable = false)
     private Long referenciaId;
 
-    @Column(nullable = false, length = 1000)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String descricao;
 
     @Enumerated(EnumType.STRING)

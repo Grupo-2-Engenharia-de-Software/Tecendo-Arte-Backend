@@ -1,7 +1,6 @@
 package com.crowdfunding.tecendoarte.config;
 
 import com.crowdfunding.tecendoarte.models.Administrador;
-import com.crowdfunding.tecendoarte.models.enums.PermissaoAdministrador;
 import com.crowdfunding.tecendoarte.repositories.AdministradorRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import java.util.Set;
 
 @Configuration
 @Profile("dev")
@@ -49,7 +47,6 @@ public class DevDataSeederConfig {
                     .nome(adminNome)
                     .email(adminEmail)
                     .senha(adminPasswordHash)
-                    .permissoes(Set.of(PermissaoAdministrador.GERENCIAR_USUARIOS))
                     .build();
             administradorRepository.save(admin);
             log.info("Administrador criado via seed: {}", adminEmail);
