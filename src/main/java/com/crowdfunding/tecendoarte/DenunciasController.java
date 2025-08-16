@@ -39,11 +39,13 @@ public class DenunciasController {
         return ListarDenunciaResponseDTO.builder()
                 .id(d.getId())
                 .tipo(d.getTipo())
-                .referenciaId(d.getReferenciaId())
+                .idAlvo(d.getIdAlvo())
                 .descricao(d.getDescricao())
                 .status(d.getStatus())
                 .criadoEm(d.getCriadoEm())
                 .atualizadoEm(d.getAtualizadoEm())
+                .nomeAutor(d.getAutor().getNome())
+                .emailAutor(d.getAutor().getEmail())
                 .build();
     }
 }

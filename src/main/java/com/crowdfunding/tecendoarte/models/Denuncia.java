@@ -23,7 +23,11 @@ public class Denuncia {
     private TipoDenuncia tipo;
 
     @Column(nullable = false)
-    private Long referenciaId;
+    private Long idAlvo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "conta_id", nullable = false)
+    private Conta autor;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String descricao;

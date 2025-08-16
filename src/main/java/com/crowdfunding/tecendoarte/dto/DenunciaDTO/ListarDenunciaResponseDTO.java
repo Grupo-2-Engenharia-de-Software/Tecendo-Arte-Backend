@@ -12,9 +12,11 @@ import java.time.LocalDateTime;
 public class ListarDenunciaResponseDTO {
     private Long id;
     private TipoDenuncia tipo;
-    private Long referenciaId;
+    private Long idAlvo;
     private String descricao;
     private StatusDenuncia status;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
+    private String nomeAutor;
+    private String emailAutor;
 }

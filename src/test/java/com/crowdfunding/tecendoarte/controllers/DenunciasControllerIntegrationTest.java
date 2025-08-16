@@ -1,9 +1,12 @@
 package com.crowdfunding.tecendoarte.controllers;
 
+import com.crowdfunding.tecendoarte.models.Conta;
 import com.crowdfunding.tecendoarte.models.Denuncia;
 import com.crowdfunding.tecendoarte.models.enums.StatusDenuncia;
 import com.crowdfunding.tecendoarte.models.enums.TipoDenuncia;
+import com.crowdfunding.tecendoarte.models.enums.TipoConta;
 import com.crowdfunding.tecendoarte.repositories.DenunciaRepository;
+import com.crowdfunding.tecendoarte.repositories.ContaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,13 +39,28 @@ class DenunciasControllerIntegrationTest {
     private DenunciaRepository denunciaRepository;
 
     @Autowired
+    private ContaRepository contaRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     private MockMvc mockMvc;
+    private Conta contaTeste;
 
     @BeforeEach
     void setUp() {
         denunciaRepository.deleteAll();
+        contaRepository.deleteAll();
+
+        // Criar conta de teste
+        contaTeste = Conta.builder()
+                .email("teste@teste.com")
+                .senha("senha123")
+                .nome("Usuário Teste")
+                .tipoConta(TipoConta.USUARIO)
+                .build();
+        contaTeste = contaRepository.save(contaTeste);
+
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
@@ -66,27 +84,46 @@ class DenunciasControllerIntegrationTest {
     void deveListarDenunciasPendentes() throws Exception {
         Denuncia d1 = Denuncia.builder()
                 .tipo(TipoDenuncia.PROJETO)
-                .referenciaId(1L)
+                .idAlvo(1L)
+                .autor(contaTeste)
                 .descricao("Conteúdo impróprio")
                 .status(StatusDenuncia.PENDENTE)
                 .build();
         Denuncia d2 = Denuncia.builder()
                 .tipo(TipoDenuncia.USUARIO)
-                .referenciaId(2L)
+                .idAlvo(2L)
+                .autor(contaTeste)
                 .descricao("Usuário spammer")
                 .status(StatusDenuncia.PENDENTE)
                 .build();
-        denunciaRepository.save(d1);
-        denunciaRepository.save(d2);
+        d1 = denunciaRepository.save(d1);
+        d2 = denunciaRepository.save(d2);
 
         mockMvc.perform(get("/api/admin/denuncias").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id").exists())
-                .andExpect(jsonPath("$[0].tipo").exists())
-                .andExpect(jsonPath("$[0].descricao").exists())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").value(org.hamcrest.Matchers.hasSize(2)))
+                // Verificar segunda denúncia (USUARIO) (ordenado por data de criação, mais recente primeiro)
+                .andExpect(jsonPath("$[0].id").value(d2.getId()))
+                .andExpect(jsonPath("$[0].tipo").value("USUARIO"))
+                .andExpect(jsonPath("$[0].idAlvo").value(2))
+                .andExpect(jsonPath("$[0].descricao").value("Usuário spammer"))
                 .andExpect(jsonPath("$[0].status").value("PENDENTE"))
-                .andExpect(jsonPath("$[1].status").value("PENDENTE"));
+                .andExpect(jsonPath("$[0].criadoEm").exists())
+                .andExpect(jsonPath("$[0].atualizadoEm").exists())
+                .andExpect(jsonPath("$[0].nomeAutor").value("Usuário Teste"))
+                .andExpect(jsonPath("$[0].emailAutor").value("teste@teste.com"))
+                // Verificar primeira denúncia (PROJETO)
+                .andExpect(jsonPath("$[1].id").value(d1.getId()))
+                .andExpect(jsonPath("$[1].tipo").value("PROJETO"))
+                .andExpect(jsonPath("$[1].idAlvo").value(1))
+                .andExpect(jsonPath("$[1].descricao").value("Conteúdo impróprio"))
+                .andExpect(jsonPath("$[1].status").value("PENDENTE"))
+                .andExpect(jsonPath("$[1].criadoEm").exists())
+                .andExpect(jsonPath("$[1].atualizadoEm").exists())
+                .andExpect(jsonPath("$[1].nomeAutor").value("Usuário Teste"))
+                .andExpect(jsonPath("$[1].emailAutor").value("teste@teste.com"));
     }
 
     @Test
@@ -94,7 +131,8 @@ class DenunciasControllerIntegrationTest {
     void deveAnalisarDenunciaComoProcedente() throws Exception {
         Denuncia d = Denuncia.builder()
                 .tipo(TipoDenuncia.ARTISTA)
-                .referenciaId(7L)
+                .idAlvo(7L)
+                .autor(contaTeste)
                 .descricao("Violação de termos")
                 .status(StatusDenuncia.PENDENTE)
                 .build();
@@ -103,8 +141,8 @@ class DenunciasControllerIntegrationTest {
         String payload = objectMapper.writeValueAsString(Map.of("resultado", "PROCEDENTE"));
 
         mockMvc.perform(post("/api/admin/denuncias/" + d.getId() + "/analise")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/admin/denuncias").accept(MediaType.APPLICATION_JSON))
@@ -119,7 +157,8 @@ class DenunciasControllerIntegrationTest {
     void deveAnalisarDenunciaComoImprocedente() throws Exception {
         Denuncia d = Denuncia.builder()
                 .tipo(TipoDenuncia.PROJETO)
-                .referenciaId(9L)
+                .idAlvo(9L)
+                .autor(contaTeste)
                 .descricao("Sem fundamento")
                 .status(StatusDenuncia.PENDENTE)
                 .build();
@@ -128,8 +167,8 @@ class DenunciasControllerIntegrationTest {
         String payload = objectMapper.writeValueAsString(Map.of("resultado", "IMPROCEDENTE"));
 
         mockMvc.perform(post("/api/admin/denuncias/" + d.getId() + "/analise")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/admin/denuncias").accept(MediaType.APPLICATION_JSON))
@@ -145,8 +184,8 @@ class DenunciasControllerIntegrationTest {
         String payload = objectMapper.writeValueAsString(Map.of("resultado", "PROCEDENTE"));
 
         mockMvc.perform(post("/api/admin/denuncias/9999/analise")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value("Denúncia não encontrada."));
@@ -157,15 +196,16 @@ class DenunciasControllerIntegrationTest {
     void deveFalharAoAnalisarSemResultado() throws Exception {
         Denuncia d = Denuncia.builder()
                 .tipo(TipoDenuncia.USUARIO)
-                .referenciaId(10L)
+                .idAlvo(10L)
+                .autor(contaTeste)
                 .descricao("Teste")
                 .status(StatusDenuncia.PENDENTE)
                 .build();
         d = denunciaRepository.save(d);
 
         mockMvc.perform(post("/api/admin/denuncias/" + d.getId() + "/analise")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(400))
@@ -179,7 +219,8 @@ class DenunciasControllerIntegrationTest {
     void deveFalharAoReanalisarDenuncia() throws Exception {
         Denuncia d = Denuncia.builder()
                 .tipo(TipoDenuncia.PROJETO)
-                .referenciaId(3L)
+                .idAlvo(3L)
+                .autor(contaTeste)
                 .descricao("Algo")
                 .status(StatusDenuncia.PENDENTE)
                 .build();
@@ -187,14 +228,14 @@ class DenunciasControllerIntegrationTest {
 
         String payload = objectMapper.writeValueAsString(Map.of("resultado", "PROCEDENTE"));
         mockMvc.perform(post("/api/admin/denuncias/" + d.getId() + "/analise")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("PROCEDENTE"));
 
         mockMvc.perform(post("/api/admin/denuncias/" + d.getId() + "/analise")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Denúncia já foi analisada."));
     }
@@ -204,7 +245,8 @@ class DenunciasControllerIntegrationTest {
     void deveFalharAoAnalisarComResultadoPendente() throws Exception {
         Denuncia d = Denuncia.builder()
                 .tipo(TipoDenuncia.USUARIO)
-                .referenciaId(11L)
+                .idAlvo(11L)
+                .autor(contaTeste)
                 .descricao("Testar pendente")
                 .status(StatusDenuncia.PENDENTE)
                 .build();
@@ -213,8 +255,8 @@ class DenunciasControllerIntegrationTest {
         String payload = objectMapper.writeValueAsString(Map.of("resultado", "PENDENTE"));
 
         mockMvc.perform(post("/api/admin/denuncias/" + d.getId() + "/analise")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value("Resultado inválido para análise."));
