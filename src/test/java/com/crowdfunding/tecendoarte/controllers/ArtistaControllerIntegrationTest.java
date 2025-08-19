@@ -53,13 +53,21 @@ class ArtistaControllerIntegrationTest {
         ));
     }
 
+    private String buildCadastroRequestJson(String nome, String email, String senha, java.util.List<String> tiposArte) throws Exception {
+        return objectMapper.writeValueAsString(java.util.Map.of(
+                "nome", nome,
+                "email", email,
+                "senha", senha,
+                "tiposArte", tiposArte
+        ));
+    }
+
     @Test
     void deveLogarComSucesso() throws Exception {
         Artista artista = Artista.builder()
                 .nome("Artista Teste")
                 .email("artista@example.com")
                 .senha(passwordEncoder.encode("secret"))
-                .confirmacaoSenha(passwordEncoder.encode("secret"))
                 .tiposArte(List.of())
                 .build();
         artistaRepository.save(artista);
@@ -95,7 +103,6 @@ class ArtistaControllerIntegrationTest {
                 .nome("Artista Teste")
                 .email("artista@example.com")
                 .senha(passwordEncoder.encode("secret"))
-                .confirmacaoSenha(passwordEncoder.encode("secret"))
                 .tiposArte(List.of())
                 .build();
         artistaRepository.save(artista);
@@ -146,5 +153,67 @@ class ArtistaControllerIntegrationTest {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.error").value("Bad Request"))
                 .andExpect(jsonPath("$.message").value("Body invalido ou JSON mal formatado."));
+    }
+
+    @Test
+    void deveCadastrarArtistaComSucesso() throws Exception {
+        String payload = buildCadastroRequestJson("Novo Artista", "novoartista@example.com", "senha123", java.util.List.of("PINTURA", "ESCULTURA"));
+
+        mockMvc.perform(post("/api/artistas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.nome").value("Novo Artista"))
+                .andExpect(jsonPath("$.email").value("novoartista@example.com"))
+                .andExpect(jsonPath("$.tiposArte").isArray());
+    }
+
+    @Test
+    void naoDeveCadastrarArtistaComEmailDuplicado() throws Exception {
+        Artista artista = Artista.builder()
+                .nome("Artista Existente")
+                .email("existente@example.com")
+                .senha(passwordEncoder.encode("senha123"))
+                .tiposArte(java.util.List.of())
+                .build();
+        artistaRepository.save(artista);
+
+        String payload = buildCadastroRequestJson("Outro Artista", "existente@example.com", "senha123", java.util.List.of("PINTURA"));
+
+        mockMvc.perform(post("/api/artistas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Artista com este e-mail já cadastrado.")));
+    }
+
+    @Test
+    void naoDeveCadastrarArtistaComCamposObrigatoriosFaltando() throws Exception {
+        String payload = buildCadastroRequestJson("", "", "", java.util.List.of());
+
+        mockMvc.perform(post("/api/artistas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("Falha de validacao nos campos."))
+                .andExpect(jsonPath("$.fields.nome").exists())
+                .andExpect(jsonPath("$.fields.email").exists())
+                .andExpect(jsonPath("$.fields.senha").exists())
+                .andExpect(jsonPath("$.fields.tiposArte").exists());
+    }
+
+    @Test
+    void naoDeveCadastrarArtistaComTipoArteInvalido() throws Exception {
+        String payload = buildCadastroRequestJson("Artista Teste", "teste@invalido.com", "senha123", java.util.List.of("TIPO_INVALIDO"));
+
+        mockMvc.perform(post("/api/artistas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Tipo de arte inválido")));
     }
 } 

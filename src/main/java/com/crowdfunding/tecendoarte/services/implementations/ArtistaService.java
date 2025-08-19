@@ -29,10 +29,6 @@ public class ArtistaService implements ArtistaServiceInterface {
 
     public Artista cadastrarArtista(ArtistaRequestDTO dto) {
 
-        if (!dto.getSenha().equals(dto.getConfirmacaoSenha())) {
-            throw new IllegalArgumentException("As senhas não coincidem. Tente novamente.");
-        }
-
         artistaRepository.findByEmail(dto.getEmail()).ifPresent(artista -> {
             throw new IllegalArgumentException("Artista com este e-mail já cadastrado.");
         });
@@ -51,7 +47,6 @@ public class ArtistaService implements ArtistaServiceInterface {
                 .nome(dto.getNome())
                 .email(dto.getEmail())
                 .senha(passwordEncoder.encode(dto.getSenha()))
-                .confirmacaoSenha(passwordEncoder.encode(dto.getConfirmacaoSenha()))
                 .tiposArte(tiposArte)
                 .build();
 
