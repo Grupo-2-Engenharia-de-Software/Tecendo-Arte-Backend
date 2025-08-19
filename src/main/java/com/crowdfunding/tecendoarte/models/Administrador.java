@@ -3,27 +3,24 @@ package com.crowdfunding.tecendoarte.models;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Entity
-@Table(name = "administradores")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Entity
 public class Administrador {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_adm", nullable = false, unique = true)
-    private Long idAdm;
+    private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL, optional = false)
-    @JoinColumn(name = "id_conta", nullable = false)
-    private Conta conta;
+    @Column(nullable = false)
+    private String nome;
 
-    @OneToMany(mappedBy = "administrador", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Denuncia> denunciasAnalisadas = new ArrayList<>();
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private String senha;
+
 }

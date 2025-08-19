@@ -78,4 +78,3 @@ public class Projeto {
     @Builder.Default
     private List<Denuncia> denuncias = new ArrayList<>();
 }
-
