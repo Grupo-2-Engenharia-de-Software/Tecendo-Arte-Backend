@@ -5,6 +5,9 @@ import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaRequestDTO;
 import com.crowdfunding.tecendoarte.services.implementations.ArtistaService;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
+import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaLoginRequestDTO;
+import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaLoginResponseDTO;
+import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping(
@@ -29,6 +32,21 @@ public class ArtistaController {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody ArtistaLoginRequestDTO request) {
+        try {
+            ArtistaLoginResponseDTO response = artistaService.login(request);
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Map.of("message", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(java.util.Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(java.util.Map.of("message", "Erro interno no servidor. Tente novamente mais tarde."));
         }
     }
 

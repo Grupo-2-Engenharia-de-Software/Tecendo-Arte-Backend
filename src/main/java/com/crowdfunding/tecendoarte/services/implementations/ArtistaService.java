@@ -8,14 +8,23 @@ import com.crowdfunding.tecendoarte.repositories.ArtistaRepository;
 import com.crowdfunding.tecendoarte.services.interfaces.ArtistaServiceInterface;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaLoginRequestDTO;
+import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaLoginResponseDTO;
+import com.crowdfunding.tecendoarte.config.JwtUtil;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ArtistaService implements ArtistaServiceInterface {
 
     private final ArtistaRepository artistaRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
     
-    public ArtistaService(ArtistaRepository artistaRepository) {
+    public ArtistaService(ArtistaRepository artistaRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.artistaRepository = artistaRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     public Artista cadastrarArtista(ArtistaRequestDTO dto) {
@@ -41,12 +50,30 @@ public class ArtistaService implements ArtistaServiceInterface {
         Artista artista = Artista.builder()
                 .nome(dto.getNome())
                 .email(dto.getEmail())
-                .senha(dto.getSenha())
-                .confirmacaoSenha(dto.getConfirmacaoSenha())
+                .senha(passwordEncoder.encode(dto.getSenha()))
+                .confirmacaoSenha(passwordEncoder.encode(dto.getConfirmacaoSenha()))
                 .tiposArte(tiposArte)
                 .build();
 
         return this.artistaRepository.save(artista);
     }
     
+    @Override
+    public ArtistaLoginResponseDTO login(ArtistaLoginRequestDTO request) {
+        Artista artista = artistaRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
+
+        if (!passwordEncoder.matches(request.getSenha(), artista.getSenha())) {
+            throw new IllegalArgumentException("Senha inválida.");
+        }
+
+        String token = jwtUtil.generateTokenForArtista(artista.getId(), artista.getEmail());
+
+        return ArtistaLoginResponseDTO.builder()
+                .id(artista.getId())
+                .nome(artista.getNome())
+                .email(artista.getEmail())
+                .token(token)
+                .build();
+    }
 }
