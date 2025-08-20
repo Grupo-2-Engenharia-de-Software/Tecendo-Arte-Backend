@@ -77,4 +77,18 @@ public class ArtistaService implements ArtistaServiceInterface {
                 .token(token)
                 .build();
     }
+
+    @Override
+    public List<ArtistaResponseDTO> buscarPorNome(String nome) {
+        List<Artista> artistas = artistaRepository.findByNomeContainingIgnoreCase(nome);
+        if (artistas.isEmpty()) {
+            throw new EntityNotFoundException("Nenhum artista encontrado com o nome informado.");
+        }
+        return artistas.stream().map(artista -> ArtistaResponseDTO.builder()
+                .nome(artista.getNome())
+                .email(artista.getEmail())
+                .tiposArte(artista.getTiposArte().stream().map(TipoArte::name).collect(Collectors.toList()))
+                .build())
+            .collect(Collectors.toList());
+    }
 }

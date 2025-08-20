@@ -50,4 +50,15 @@ public class ArtistaController {
         }
     }
 
+    @GetMapping("/buscar")
+    public ResponseEntity<?> buscarPorNome(@RequestParam("nome") String nome) {
+        try {
+            return ResponseEntity.ok(artistaService.buscarPorNome(nome));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(java.util.Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(java.util.Map.of("message", "Erro interno no servidor. Tente novamente mais tarde."));
+        }
+    }
 }

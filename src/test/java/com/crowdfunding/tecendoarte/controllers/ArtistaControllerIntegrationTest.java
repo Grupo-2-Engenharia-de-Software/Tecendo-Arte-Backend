@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -216,4 +217,41 @@ class ArtistaControllerIntegrationTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Tipo de arte inválido")));
     }
-} 
+
+    @Test
+    void deveBuscarArtistaPorNomeComSucesso() throws Exception {
+        Artista artista1 = Artista.builder()
+                .nome("Maria da Silva")
+                .email("maria@exemplo.com")
+                .senha(passwordEncoder.encode("senha1"))
+                .tiposArte(List.of())
+                .build();
+        Artista artista2 = Artista.builder()
+                .nome("Mariana Souza")
+                .email("mariana@exemplo.com")
+                .senha(passwordEncoder.encode("senha2"))
+                .tiposArte(List.of())
+                .build();
+        artistaRepository.saveAll(List.of(artista1, artista2));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/artistas/buscar")
+                        .param("nome", "Maria")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].nome").value("Maria da Silva"))
+                .andExpect(jsonPath("$[0].email").value("maria@exemplo.com"))
+                .andExpect(jsonPath("$[1].nome").value("Mariana Souza"))
+                .andExpect(jsonPath("$[1].email").value("mariana@exemplo.com"));
+    }
+
+    @Test
+    void deveRetornarNotFoundQuandoNaoEncontrarArtistaPorNome() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/artistas/buscar")
+                        .param("nome", "Inexistente")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Nenhum artista encontrado com o nome informado."));
+    }
+}
