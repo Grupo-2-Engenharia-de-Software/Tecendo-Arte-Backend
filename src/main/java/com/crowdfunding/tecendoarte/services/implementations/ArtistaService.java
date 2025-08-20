@@ -1,7 +1,6 @@
 package com.crowdfunding.tecendoarte.services.implementations;
 
 import org.springframework.stereotype.Service;
-import com.crowdfunding.tecendoarte.dto.ArtistaDTO.*;
 import com.crowdfunding.tecendoarte.models.Artista;
 import com.crowdfunding.tecendoarte.models.enums.TipoArte;
 import com.crowdfunding.tecendoarte.repositories.ArtistaRepository;
@@ -10,6 +9,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaLoginRequestDTO;
 import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaLoginResponseDTO;
+import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaRequestDTO;
+import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaResponseDTO;
 import com.crowdfunding.tecendoarte.config.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,7 +28,7 @@ public class ArtistaService implements ArtistaServiceInterface {
         this.jwtUtil = jwtUtil;
     }
 
-    public Artista cadastrarArtista(ArtistaRequestDTO dto) {
+    public ArtistaResponseDTO cadastrarArtista(ArtistaRequestDTO dto) {
 
         artistaRepository.findByEmail(dto.getEmail()).ifPresent(artista -> {
             throw new IllegalArgumentException("Artista com este e-mail já cadastrado.");
@@ -50,7 +51,12 @@ public class ArtistaService implements ArtistaServiceInterface {
                 .tiposArte(tiposArte)
                 .build();
 
-        return this.artistaRepository.save(artista);
+        Artista salvo = this.artistaRepository.save(artista);
+        return ArtistaResponseDTO.builder()
+                .nome(salvo.getNome())
+                .email(salvo.getEmail())
+                .tiposArte(salvo.getTiposArte().stream().map(TipoArte::name).collect(Collectors.toList()))
+                .build();
     }
     
     @Override

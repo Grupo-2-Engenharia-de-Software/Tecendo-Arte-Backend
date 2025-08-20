@@ -164,10 +164,10 @@ class ArtistaControllerIntegrationTest {
                         .content(payload))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.nome").value("Novo Artista"))
                 .andExpect(jsonPath("$.email").value("novoartista@example.com"))
-                .andExpect(jsonPath("$.tiposArte").isArray());
+                .andExpect(jsonPath("$.tiposArte").isArray())
+                .andExpect(jsonPath("$.senha").doesNotExist());
     }
 
     @Test
