@@ -11,6 +11,8 @@ import jakarta.persistence.EntityNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @Tag(name = "Artistas", description = "Operações relacionadas a artistas")
 @RestController
@@ -26,6 +28,24 @@ public class ArtistaController {
         this.artistaService = artistaService;
     }
 
+    @Operation(
+        summary = "Cadastrar novo artista", 
+        description = "Cadastra um novo artista no sistema. Rota pública, não requer autenticação.",
+        responses = {
+            @ApiResponse(
+                responseCode = "201", 
+                description = "Artista cadastrado com sucesso"
+            ),
+            @ApiResponse(
+                responseCode = "400", 
+                description = "Dados inválidos ou campos obrigatórios não preenchidos"
+            ),
+            @ApiResponse(
+                responseCode = "500", 
+                description = "Erro interno do servidor"
+            )
+        }
+    )
     @PostMapping
     public ResponseEntity<?> cadastrar(@Valid @RequestBody ArtistaRequestDTO dto) {
         try {
@@ -39,6 +59,32 @@ public class ArtistaController {
         }
     }
 
+    @Operation(
+        summary = "Login de artista", 
+        description = "Realiza autenticação de artista. Rota pública, não requer autenticação.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200", 
+                description = "Login realizado com sucesso"
+            ),
+            @ApiResponse(
+                responseCode = "400", 
+                description = "Dados inválidos ou campos obrigatórios não preenchidos"
+            ),
+            @ApiResponse(
+                responseCode = "401", 
+                description = "Credenciais inválidas"
+            ),
+            @ApiResponse(
+                responseCode = "404", 
+                description = "Artista não encontrado"
+            ),
+            @ApiResponse(
+                responseCode = "500", 
+                description = "Erro interno do servidor"
+            )
+        }
+    )
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody ArtistaLoginRequestDTO request) {
         try {
@@ -54,7 +100,29 @@ public class ArtistaController {
         }
     }
 
-    @Operation(summary = "Buscar artista por nome", description = "Retorna um ou mais artistas que correspondam ao nome informado.")
+    @Operation(
+        summary = "Buscar artista por nome", 
+        description = "Retorna um ou mais artistas que correspondam ao nome informado. Requer autenticação.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200", 
+                description = "Artistas encontrados com sucesso"
+            ),
+            @ApiResponse(
+                responseCode = "403", 
+                description = "Acesso negado - autenticação necessária"
+            ),
+            @ApiResponse(
+                responseCode = "404", 
+                description = "Nenhum artista encontrado com o nome especificado"
+            ),
+            @ApiResponse(
+                responseCode = "500", 
+                description = "Erro interno do servidor"
+            )
+        }
+    )
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/buscar")
     public ResponseEntity<?> buscarPorNome(
             @Parameter(description = "Nome do artista a ser buscado", example = "Maria")
