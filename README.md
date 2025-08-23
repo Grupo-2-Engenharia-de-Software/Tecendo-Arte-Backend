@@ -23,7 +23,7 @@ Funcionalidades principais:
 - Banco de dados relacional (PostgreSQL)
 - Gradle
 - Lombok
-- Swagger (em breve)
+- Swagger
 - Docker (planejado)
 
 ## Estrutura do Projeto
@@ -60,3 +60,11 @@ cd Tecendo-Arte-Backend
 
 # Rode a aplicação
 ./gradlew bootRun
+```
+
+## Documentação da API
+
+Após executar a aplicação, a documentação interativa da API estará disponível em:
+**http://localhost:8080/swagger-ui/index.html**
+
+A documentação inclui todas as rotas disponíveis e parâmetros necessários.
