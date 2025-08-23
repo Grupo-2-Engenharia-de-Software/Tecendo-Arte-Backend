@@ -8,7 +8,11 @@ import org.springframework.http.*;
 import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaLoginRequestDTO;
 import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaLoginResponseDTO;
 import jakarta.persistence.EntityNotFoundException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Tag(name = "Artistas", description = "Operações relacionadas a artistas")
 @RestController
 @RequestMapping(
         value = "api/artistas",
@@ -50,8 +54,11 @@ public class ArtistaController {
         }
     }
 
+    @Operation(summary = "Buscar artista por nome", description = "Retorna um ou mais artistas que correspondam ao nome informado.")
     @GetMapping("/buscar")
-    public ResponseEntity<?> buscarPorNome(@RequestParam("nome") String nome) {
+    public ResponseEntity<?> buscarPorNome(
+            @Parameter(description = "Nome do artista a ser buscado", example = "Maria")
+            @RequestParam("nome") String nome) {
         try {
             return ResponseEntity.ok(artistaService.buscarPorNome(nome));
         } catch (EntityNotFoundException e) {
