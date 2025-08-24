@@ -1,4 +1,4 @@
-package com.crowdfunding.tecendoarte;
+package com.crowdfunding.tecendoarte.controllers;
 
 import com.crowdfunding.tecendoarte.dto.AdministradorDTO.AdminLoginRequestDTO;
 import com.crowdfunding.tecendoarte.dto.AdministradorDTO.AdminLoginResponseDTO;

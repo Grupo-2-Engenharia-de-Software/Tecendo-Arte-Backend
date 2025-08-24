@@ -59,16 +59,21 @@ docker-compose down -v postgres
 - Verifique se a porta 5432 está livre
 - Verifique as credenciais no application.properties
 
-## Desenvolvimento vs Produção
+## Perfis de Execução
 
-- **Desenvolvimento**: Use H2 (configuração padrão)
-- **Produção**: Use PostgreSQL com perfil `prod`
-
-Para alternar entre os dois, use:
+### Perfil Padrão (PostgreSQL)
 ```bash
-# Desenvolvimento (H2)
+# Inicia com PostgreSQL (padrão)
 ./gradlew bootRun
+```
 
-# Produção (PostgreSQL)
+### Perfil H2 (Desenvolvimento/Testes)
+```bash
+# Inicia com H2 para desenvolvimento
+./gradlew bootRun --args='--spring.profiles.active=h2'
+```
+
+### Perfil Produção
+```bash
 ./gradlew bootRun --args='--spring.profiles.active=prod'
 ```
