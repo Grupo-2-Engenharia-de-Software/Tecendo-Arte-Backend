@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Profile;
 
 
 @Configuration
-@Profile("dev")
+@Profile("!prod")
 public class DevDataSeederConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DevDataSeederConfig.class);

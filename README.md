@@ -1,4 +1,3 @@
-# Tecendo-Arte-Backend
 # Tecendo Arte - Backend
 
 Este é o repositório backend do projeto **Tecendo Arte**, uma plataforma de financiamento coletivo voltada para artistas plásticos e visuais, desenvolvida como parte da disciplina de **Engenharia de Software** (UFCG - 2025.2).
@@ -24,7 +23,7 @@ Funcionalidades principais:
 - Gradle
 - Lombok
 - Swagger
-- Docker (planejado)
+- Docker
 
 ## Estrutura do Projeto
 
@@ -51,6 +50,13 @@ O gerenciamento das tarefas está sendo feito via **GitHub Projects** com issues
 
 ## Como rodar localmente
 
+### Pré-requisitos
+- Java 21
+- Gradle
+- Docker e Docker Compose (para PostgreSQL)
+
+### Executando a aplicação
+
 ```bash
 # Clone o repositório
 git clone https://github.com/SEU_USUARIO/Tecendo-Arte-Backend.git
@@ -58,8 +64,16 @@ git clone https://github.com/SEU_USUARIO/Tecendo-Arte-Backend.git
 # Navegue até o diretório
 cd Tecendo-Arte-Backend
 
-# Rode a aplicação
+# Inicia com H2 (para desenvolvimento/testes)
+./gradlew bootRun --args='--spring.profiles.active=h2'
+
+# Inicia com PostgreSQL
+# Na raiz do projeto, execute:
+docker-compose up -d postgres
 ./gradlew bootRun
+
+# Inicia em produção
+./gradlew bootRun --args='--spring.profiles.active=prod'
 ```
 
 ## Documentação da API
