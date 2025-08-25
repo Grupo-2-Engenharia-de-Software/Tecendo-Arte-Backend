@@ -23,10 +23,6 @@ public class ArtistaRequestDTO {
     @NotBlank(message = "Senha de Artista Obrigatoria!")
     private String senha;
 
-    @JsonProperty("confirmacaoSenha")
-    @NotBlank(message = "Confirmacao de Senha de Artista Obrigatoria!")
-    private String confirmacaoSenha;
-
     @JsonProperty("tiposArte")
     @NotEmpty(message = "Tipos de Arte Obrigatorios!")
     private List<@NotBlank String> tiposArte;
