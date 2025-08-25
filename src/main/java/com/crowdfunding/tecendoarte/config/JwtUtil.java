@@ -40,6 +40,20 @@ public class JwtUtil {
                 .compact();
     }
 
+    public String generateTokenForArtista(Long artistaId, String email) {
+        Instant now = Instant.now();
+        return Jwts.builder()
+                .subject(email)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusSeconds(expirationSeconds)))
+                .claims(Map.of(
+                        "arid", artistaId,
+                        "role", "ARTISTA"
+                ))
+                .signWith(secretKey)
+                .compact();
+    }
+
     public boolean isTokenValid(String token) {
         try {
             Claims claims = parseAllClaims(token);

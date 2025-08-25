@@ -22,7 +22,7 @@ Funcionalidades principais:
 - Banco de dados relacional (PostgreSQL)
 - Gradle
 - Lombok
-- Swagger (em breve)
+- Swagger
 - Docker
 
 ## Estrutura do Projeto
@@ -75,3 +75,10 @@ docker-compose up -d postgres
 # Inicia em produção
 ./gradlew bootRun --args='--spring.profiles.active=prod'
 ```
+
+## Documentação da API
+
+Após executar a aplicação, a documentação interativa da API estará disponível em:
+**http://localhost:8080/swagger-ui/index.html**
+
+A documentação inclui todas as rotas disponíveis e parâmetros necessários.
