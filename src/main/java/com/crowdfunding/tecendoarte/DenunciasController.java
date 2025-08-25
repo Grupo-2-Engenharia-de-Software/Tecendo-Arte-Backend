@@ -9,10 +9,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Tag(name = "Denúncias", description = "Operações relacionadas a denúncias de conteúdo")
 @RestController
 @RequestMapping(value = "/api/admin/denuncias", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
@@ -20,6 +28,11 @@ public class DenunciasController {
 
     private final DenunciaServiceInterface denunciaService;
 
+    @Operation(summary = "Listar denúncias", description = "Lista todas as denúncias cadastradas.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Denúncias listadas com sucesso", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ListarDenunciaResponseDTO.class)))),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor", content = @Content)
+    })
     @GetMapping
     public ResponseEntity<List<ListarDenunciaResponseDTO>> listar() {
         List<ListarDenunciaResponseDTO> resposta = denunciaService.listarTodas().stream()
@@ -28,6 +41,13 @@ public class DenunciasController {
         return ResponseEntity.ok(resposta);
     }
 
+    @Operation(summary = "Analisar denúncia", description = "Analisa uma denúncia e atualiza seu status.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Denúncia analisada com sucesso", content = @Content(schema = @Schema(implementation = ListarDenunciaResponseDTO.class))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos ou campos obrigatórios não preenchidos", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Denúncia não encontrada", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor", content = @Content)
+    })
     @PostMapping(path = "/{id}/analise", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ListarDenunciaResponseDTO> analisar(@PathVariable Long id,
                                                               @Valid @RequestBody AnaliseDenunciaRequestDTO request) {

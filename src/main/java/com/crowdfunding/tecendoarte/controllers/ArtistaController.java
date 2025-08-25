@@ -2,6 +2,7 @@ package com.crowdfunding.tecendoarte.controllers;
 
 import org.springframework.web.bind.annotation.*;
 import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaRequestDTO;
+import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaResponseDTO;
 import com.crowdfunding.tecendoarte.services.implementations.ArtistaService;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
@@ -12,13 +13,17 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @Tag(name = "Artistas", description = "Operações relacionadas a artistas")
 @RestController
 @RequestMapping(
-        value = "api/artistas",
-        produces = MediaType.APPLICATION_JSON_VALUE
+    value = "api/artistas",
+    produces = MediaType.APPLICATION_JSON_VALUE
 )
 public class ArtistaController {
 
@@ -28,24 +33,12 @@ public class ArtistaController {
         this.artistaService = artistaService;
     }
 
-    @Operation(
-        summary = "Cadastrar novo artista", 
-        description = "Cadastra um novo artista no sistema. Rota pública, não requer autenticação.",
-        responses = {
-            @ApiResponse(
-                responseCode = "201", 
-                description = "Artista cadastrado com sucesso"
-            ),
-            @ApiResponse(
-                responseCode = "400", 
-                description = "Dados inválidos ou campos obrigatórios não preenchidos"
-            ),
-            @ApiResponse(
-                responseCode = "500", 
-                description = "Erro interno do servidor"
-            )
-        }
-    )
+    @Operation(summary = "Cadastrar novo artista", description = "Cadastra um novo artista no sistema. Rota pública, não requer autenticação.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Artista cadastrado com sucesso", content = @Content(schema = @Schema(implementation = ArtistaResponseDTO.class))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos ou campos obrigatórios não preenchidos", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor", content = @Content)
+    })
     @PostMapping
     public ResponseEntity<?> cadastrar(@Valid @RequestBody ArtistaRequestDTO dto) {
         try {
@@ -59,32 +52,14 @@ public class ArtistaController {
         }
     }
 
-    @Operation(
-        summary = "Login de artista", 
-        description = "Realiza autenticação de artista. Rota pública, não requer autenticação.",
-        responses = {
-            @ApiResponse(
-                responseCode = "200", 
-                description = "Login realizado com sucesso"
-            ),
-            @ApiResponse(
-                responseCode = "400", 
-                description = "Dados inválidos ou campos obrigatórios não preenchidos"
-            ),
-            @ApiResponse(
-                responseCode = "401", 
-                description = "Credenciais inválidas"
-            ),
-            @ApiResponse(
-                responseCode = "404", 
-                description = "Artista não encontrado"
-            ),
-            @ApiResponse(
-                responseCode = "500", 
-                description = "Erro interno do servidor"
-            )
-        }
-    )
+    @Operation(summary = "Login de artista", description = "Realiza autenticação de artista. Rota pública, não requer autenticação.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Login realizado com sucesso", content = @Content(schema = @Schema(implementation = ArtistaLoginResponseDTO.class))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos ou campos obrigatórios não preenchidos", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Credenciais inválidas", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Artista não encontrado", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor", content = @Content)
+    })
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody ArtistaLoginRequestDTO request) {
         try {
@@ -100,28 +75,13 @@ public class ArtistaController {
         }
     }
 
-    @Operation(
-        summary = "Buscar artista por nome", 
-        description = "Retorna um ou mais artistas que correspondam ao nome informado. Requer autenticação.",
-        responses = {
-            @ApiResponse(
-                responseCode = "200", 
-                description = "Artistas encontrados com sucesso"
-            ),
-            @ApiResponse(
-                responseCode = "403", 
-                description = "Acesso negado - autenticação necessária"
-            ),
-            @ApiResponse(
-                responseCode = "404", 
-                description = "Nenhum artista encontrado com o nome especificado"
-            ),
-            @ApiResponse(
-                responseCode = "500", 
-                description = "Erro interno do servidor"
-            )
-        }
-    )
+    @Operation(summary = "Buscar artista por nome", description = "Retorna um ou mais artistas que correspondam ao nome informado. Requer autenticação.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Artistas encontrados com sucesso", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ArtistaResponseDTO.class)))),
+        @ApiResponse(responseCode = "403", description = "Acesso negado - autenticação necessária", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Nenhum artista encontrado com o nome especificado", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor", content = @Content)
+    })
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/buscar")
     public ResponseEntity<?> buscarPorNome(

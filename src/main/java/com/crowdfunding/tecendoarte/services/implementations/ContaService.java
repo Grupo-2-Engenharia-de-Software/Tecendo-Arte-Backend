@@ -1,7 +1,6 @@
 package com.crowdfunding.tecendoarte.services.implementations;
 
 import com.crowdfunding.tecendoarte.dto.ContaDTO.*;
-import com.crowdfunding.tecendoarte.models.enums.*;
 import com.crowdfunding.tecendoarte.models.Conta;
 import com.crowdfunding.tecendoarte.repositories.ContaRepository;
 import com.crowdfunding.tecendoarte.services.interfaces.ContaServiceInterface;
@@ -21,10 +20,6 @@ public class ContaService implements ContaServiceInterface {
 
     @Override
     public ContaResponseDTO cadastrar(ContaRequestDTO contaDTO) {
-        if (!contaDTO.getSenha().equals(contaDTO.getConfirmacaoSenha())) {
-            throw new IllegalArgumentException("As senhas nao coincidem.");
-        }
-
         contaRepository.findByEmail(contaDTO.getEmail()).ifPresent(conta -> {
             throw new IllegalArgumentException("Ja existe uma conta com este e-mail.");
         });
@@ -51,10 +46,6 @@ public class ContaService implements ContaServiceInterface {
     public ContaResponseDTO atualizarConta(Long id, ContaRequestDTO contaDTO) {
         Conta conta = contaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada."));
-
-        if (!contaDTO.getSenha().equals(contaDTO.getConfirmacaoSenha())) {
-            throw new IllegalArgumentException("As senhas não coincidem.");
-        }
 
         conta.setNome(contaDTO.getNome());
         conta.setEmail(contaDTO.getEmail());
