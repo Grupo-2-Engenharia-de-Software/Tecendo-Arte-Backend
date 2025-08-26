@@ -25,12 +25,17 @@ public class UsuarioService implements UsuarioServiceInterface {
         Conta conta = contaRepository.findById(dto.getContaId())
                 .orElseThrow(() -> new EntityNotFoundException("Conta nao encontrada"));
 
+        // valida se já existe usuário com essa conta
+        if (usuarioRepository.findByConta(conta).isPresent()) {
+            throw new IllegalArgumentException("Ja existe um usuario vinculado a essa conta.");
+        }
+
         Usuario usuario = Usuario.builder()
                 .conta(conta)
                 .interesses(dto.getInteresses())
                 .build();
 
-        usuarioRepository.save(usuario);
+        usuario = usuarioRepository.save(usuario);
 
         return toResponseDTO(usuario);
     }
@@ -38,7 +43,7 @@ public class UsuarioService implements UsuarioServiceInterface {
     @Override
     public UsuarioResponseDTO buscarPorId(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario nao encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("Usuario não encontrado"));
         return toResponseDTO(usuario);
     }
 
@@ -49,6 +54,8 @@ public class UsuarioService implements UsuarioServiceInterface {
                 .orElseThrow(() -> new EntityNotFoundException("Usuario nao encontrado"));
 
         usuario.setInteresses(dto.getInteresses());
+
+        usuario = usuarioRepository.save(usuario); // 🔹 garantir persistência
 
         return toResponseDTO(usuario);
     }
