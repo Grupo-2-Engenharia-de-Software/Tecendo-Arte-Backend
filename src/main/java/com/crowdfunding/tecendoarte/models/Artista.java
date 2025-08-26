@@ -15,23 +15,32 @@ public class Artista {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_artista")
+    @Column(name = "id_artista", nullable = false, unique = true)
     private Long id;
 
-    @Column(name = "nome_artista", nullable = false)
+    @Column(name = "nome_artista", nullable = false, unique = true)
     private String nome;
 
-    @Column(name = "email_artista", nullable = false, unique = true)
-    private String email;
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_conta", referencedColumnName = "idConta", nullable = false, unique = true)
+    private Conta conta;
 
-    @Column(name = "senha_artista", nullable = false)
-    private String senha;
+    @Column(name = descricao_artista, nullable = false, columnDefinition = "TEXT")
+    private String descricao;
 
     @Builder.Default
     @ElementCollection(targetClass = TipoArte.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "artista_tipos_arte", joinColumns = @JoinColumn(name = "id_artista"))
+    @CollectionTable(name = "artista_categorias", joinColumns = @JoinColumn(name = "id_artista"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipos_arte")
-    private List<TipoArte> tiposArte = new ArrayList<>();
+    @Column(name = "categorias", nullable = false)
+    private List<TipoArte> categorias = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "artista", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "idProjeto", nullable = true, unique = false)
+    private List<Projeto> projetos = new ArrayList<>();
+
+    // A modelagem indica a necessidade do atributo "recompensas". 
+    // Não é necessário, pois são os projetos que possuem recompensas.
 
 }
