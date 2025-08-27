@@ -4,6 +4,9 @@ import com.crowdfunding.tecendoarte.dto.ContaDTO.ContaRequestDTO;
 import com.crowdfunding.tecendoarte.dto.ContaDTO.ContaResponseDTO;
 import com.crowdfunding.tecendoarte.models.enums.TipoConta;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.transaction.Transactional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +56,7 @@ class ContaControllerIntegrationTest {
     }
 
     @Test
+    @Transactional
     void criarConta_sucesso() throws Exception {
         ContaRequestDTO dto = new ContaRequestDTO();
         dto.setNome("Maria");
@@ -118,23 +122,31 @@ class ContaControllerIntegrationTest {
     }
 
     @Test
+    @Transactional
     void criarConta_duplicada_deveFalhar() throws Exception {
+        String emailDuplicado = "testeDuplicado" + System.currentTimeMillis() + "@example.com";
+
         ContaRequestDTO dto = new ContaRequestDTO();
         dto.setNome("TesteDuplicado");
-        dto.setEmail("testeDuplicado@example.com");
+        dto.setEmail(emailDuplicado);
         dto.setSenha("123456");
         dto.setTipoConta(TipoConta.USUARIO);
 
+        // 1ª vez → deve criar
         mockMvc.perform(post("/contas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated());
 
+        // 2ª vez (mesmo e-mail) → deve falhar
         mockMvc.perform(post("/contas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("email")));
     }
+
+
 
     @Test
     @WithMockUser(username = "admin", roles = {"USER"})

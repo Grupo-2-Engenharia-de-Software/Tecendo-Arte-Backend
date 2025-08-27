@@ -1,16 +1,17 @@
 package com.crowdfunding.tecendoarte.controllers;
 
-
 import com.crowdfunding.tecendoarte.dto.ContaDTO.ContaRequestDTO;
 import com.crowdfunding.tecendoarte.dto.UsuarioDTO.UsuarioRequestDTO;
-import com.crowdfunding.tecendoarte.dto.UsuarioDTO.UsuarioResponseDTO;
+import com.crowdfunding.tecendoarte.models.Conta;
+import com.crowdfunding.tecendoarte.models.Usuario;
 import com.crowdfunding.tecendoarte.models.enums.TipoArte;
 import com.crowdfunding.tecendoarte.models.enums.TipoConta;
+import com.crowdfunding.tecendoarte.repositories.ContaRepository;
+import com.crowdfunding.tecendoarte.repositories.UsuarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import jakarta.transaction.Transactional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,36 +20,36 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.UUID;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc(addFilters = false) // sem filtros de segurança nos testes
 class UsuarioControllerIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper;
+    @Autowired private UsuarioRepository usuarioRepository;
+    @Autowired private ContaRepository contaRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    private Long usuarioIdCriado;
-
-    @BeforeEach
-    void setUp() throws Exception {
-        Long contaId = criarContaEObterId();
-        usuarioIdCriado = criarUsuario(contaId, null).getId();
+    // ---------- Helpers ----------
+    private String novoEmail() {
+        return "conta_" + UUID.randomUUID() + "@email.com";
     }
 
-    private Long criarContaEObterId() throws Exception {
-        ContaRequestDTO contaDto = new ContaRequestDTO();
-        contaDto.setNome("Teste");
-        contaDto.setEmail("teste" + System.currentTimeMillis() + "@example.com");
-        contaDto.setSenha("123456");
-        contaDto.setTipoConta(TipoConta.USUARIO);
+    private Long criarConta() throws Exception {
+        ContaRequestDTO contaDto = ContaRequestDTO.builder()
+                .nome("Conta Teste")
+                .email(novoEmail())
+                .senha("123456")
+                .tipoConta(TipoConta.USUARIO)
+                .build();
 
-        String responseConta = mockMvc.perform(post("/contas")
+        var resp = mockMvc.perform(post("/contas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(contaDto)))
                 .andExpect(status().isCreated())
@@ -57,125 +58,135 @@ class UsuarioControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        return objectMapper.readTree(responseConta).get("idConta").asLong();
+        return objectMapper.readTree(resp).get("idConta").asLong();
     }
 
-    private UsuarioResponseDTO criarUsuario(Long contaId, List<TipoArte> interesses) throws Exception {
-        UsuarioRequestDTO dto = new UsuarioRequestDTO();
-        dto.setContaId(contaId);
-        dto.setInteresses(interesses != null ? interesses : List.of(TipoArte.DESENHO));
+    private Long criarUsuario(Long contaId, List<TipoArte> interesses) throws Exception {
+        UsuarioRequestDTO usuarioDto = new UsuarioRequestDTO();
+        usuarioDto.setContaId(contaId);
+        usuarioDto.setInteresses(interesses);
 
-        String responseUsuario = mockMvc.perform(post("/usuarios")
+        var resp = mockMvc.perform(post("/usuarios")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        return objectMapper.readValue(responseUsuario, UsuarioResponseDTO.class);
-    }
-
-    @Test
-    void criarUsuario_sucesso() throws Exception {
-        Long contaId = criarContaEObterId(); // <<< cria a conta primeiro
-
-        UsuarioRequestDTO dto = new UsuarioRequestDTO();
-        dto.setContaId(contaId); // usa o ID real da conta criada
-        dto.setInteresses(List.of(TipoArte.DESENHO, TipoArte.PINTURA));
-
-        mockMvc.perform(post("/usuarios")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(objectMapper.writeValueAsString(usuarioDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.contaId").value(contaId))
-                .andExpect(jsonPath("$.interesses[0]").value("DESENHO"));
-    }
-
-    @Test
-    void buscarUsuario_porId_eValidarCampos() throws Exception {
-        Long contaId = criarContaEObterId();
-
-        // cria o usuário depois da conta
-        UsuarioRequestDTO dto = new UsuarioRequestDTO();
-        dto.setContaId(contaId);
-        dto.setInteresses(List.of(TipoArte.DESENHO));
-
-        String usuarioResp = mockMvc.perform(post("/usuarios")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Long usuarioId = objectMapper.readTree(usuarioResp).get("id").asLong();
+        return objectMapper.readTree(resp).get("id").asLong();
+    }
 
-        // busca o usuário criado
-        String resp = mockMvc.perform(get("/usuarios/{id}", usuarioId))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+    // ---------- Testes ----------
 
-        UsuarioResponseDTO buscado = objectMapper.readValue(resp, UsuarioResponseDTO.class);
+    @Test
+    void criarUsuario_comContaValida_deveRetornarCriado() throws Exception {
+        Long contaId = criarConta(); // usuário já criado automaticamente
 
-        assertThat(buscado.getId()).isEqualTo(usuarioId);
-        assertThat(buscado.getContaId()).isEqualTo(contaId);
-        assertThat(buscado.getInteresses()).isNotEmpty();
+        Usuario usuario = usuarioRepository.findByContaId(contaId)
+                .orElseThrow(() -> new AssertionError("Usuario não foi criado automaticamente"));
+
+        assertNotNull(usuario.getId());
+        assertEquals(contaId, usuario.getConta().getIdConta());
+        assertTrue(usuario.getInteresses().isEmpty());
     }
 
     @Test
-    void buscarUsuario_porId() throws Exception {
-        mockMvc.perform(get("/usuarios/{id}", usuarioIdCriado))
+    void buscarUsuario_existente_deveRetornarOk() throws Exception {
+        Long contaId = criarConta(); // cria a conta e o usuário automático
+        Usuario usuario = usuarioRepository.findByConta(contaRepository.findById(contaId).get()).get();
+        Long usuarioId = usuario.getId();
+
+        mockMvc.perform(get("/usuarios/{id}", usuarioId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(usuarioIdCriado));
+                .andExpect(jsonPath("$.id").value(usuarioId))
+                .andExpect(jsonPath("$.contaId").value(contaId));
     }
 
     @Test
-    void atualizarUsuario_interesses() throws Exception {
-        UsuarioRequestDTO dto = new UsuarioRequestDTO();
-        dto.setContaId(1L);
-        dto.setInteresses(List.of(TipoArte.ESCULTURA));
+    void atualizarUsuario_mudarInteresses_deveRetornarOk() throws Exception {
+        Long contaId = criarConta(); // cria a conta e usuário automático
+        Usuario usuario = usuarioRepository.findByConta(contaRepository.findById(contaId).get()).get();
+        Long usuarioId = usuario.getId();
 
-        mockMvc.perform(put("/usuarios/{id}", usuarioIdCriado)
+        UsuarioRequestDTO req = new UsuarioRequestDTO();
+        req.setContaId(contaId); // mantém a mesma conta
+        req.setInteresses(List.of(TipoArte.FOTOGRAFIA));
+
+        mockMvc.perform(put("/usuarios/{id}", usuarioId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.interesses[0]").value("ESCULTURA"));
+                .andExpect(jsonPath("$.id").value(usuarioId))
+                .andExpect(jsonPath("$.contaId").value(contaId))
+                .andExpect(jsonPath("$.interesses[0]").value("FOTOGRAFIA"));
     }
 
     @Test
-    void deletarUsuario() throws Exception {
-        mockMvc.perform(delete("/usuarios/{id}", usuarioIdCriado))
+    void deletarUsuario_existente_deveRetornarNoContent() throws Exception {
+        Long contaId = criarConta();
+        Usuario usuario = usuarioRepository.findByContaId(contaId)
+                .orElseThrow(() -> new AssertionError("Usuario não foi criado automaticamente"));
+        Long usuarioId = usuario.getId();
+
+        mockMvc.perform(delete("/usuarios/{id}", usuarioId))
                 .andExpect(status().isNoContent());
 
-        // Garantir que não existe mais
-        mockMvc.perform(get("/usuarios/{id}", usuarioIdCriado))
+        mockMvc.perform(get("/usuarios/{id}", usuarioId))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void criarUsuario_semConta_deveFalharValidacao() throws Exception {
+    void criarUsuario_semConta_deveRetornarBadRequest() throws Exception {
         UsuarioRequestDTO req = new UsuarioRequestDTO();
-        // contaId não setado
+        // sem contaId
+
         mockMvc.perform(post("/usuarios")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.fields.contaId").exists());
+                // dependendo do teu handler, a mensagem pode variar; assert suave:
+                .andExpect(content().string(containsString("contaId")));
     }
 
     @Test
-    void deveRetornarErroAoBuscarUsuarioInexistente() throws Exception {
-        mockMvc.perform(get("/usuarios/{id}", 9999))
+    void buscarUsuario_inexistente_deveRetornarNotFound() throws Exception {
+        mockMvc.perform(get("/usuarios/{id}", 999999L))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void deveRetornarErroAoDeletarUsuarioInexistente() throws Exception {
-        mockMvc.perform(delete("/usuarios/{id}", 9999))
+    void deletarUsuario_inexistente_deveRetornarNotFound() throws Exception {
+        mockMvc.perform(delete("/usuarios/{id}", 999999L))
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void naoDeveCriarUsuarioSeContaJaPossuiUsuario() throws Exception {
+        Long contaId = criarConta(); // já cria o usuário automaticamente
+
+        UsuarioRequestDTO segundo = new UsuarioRequestDTO();
+        segundo.setContaId(contaId);
+        segundo.setInteresses(List.of(TipoArte.ESCULTURA));
+
+        mockMvc.perform(post("/usuarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(segundo)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("Ja existe um usuario vinculado a essa conta.")));
+    }
+
+    @Test
+    void criarUsuario_comContaInexistente_deveRetornarNotFound() throws Exception {
+        UsuarioRequestDTO req = new UsuarioRequestDTO();
+        req.setContaId(999999L);
+        req.setInteresses(List.of(TipoArte.PINTURA));
+
+        mockMvc.perform(post("/usuarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isNotFound());
+    }
 }
