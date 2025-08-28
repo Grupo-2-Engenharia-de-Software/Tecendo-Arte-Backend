@@ -47,3 +47,6 @@ cd Tecendo-Arte-Backend
 
 # Rode a aplicação
 ./gradlew bootRun
+
+# Rode os testes da aplicação
+./gradlew test
