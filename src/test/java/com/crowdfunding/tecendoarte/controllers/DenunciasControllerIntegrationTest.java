@@ -7,6 +7,7 @@ import com.crowdfunding.tecendoarte.models.enums.TipoDenuncia;
 import com.crowdfunding.tecendoarte.models.enums.TipoConta;
 import com.crowdfunding.tecendoarte.repositories.DenunciaRepository;
 import com.crowdfunding.tecendoarte.repositories.ContaRepository;
+import com.crowdfunding.tecendoarte.repositories.UsuarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,9 @@ class DenunciasControllerIntegrationTest {
     private ContaRepository contaRepository;
 
     @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     private MockMvc mockMvc;
@@ -50,6 +54,7 @@ class DenunciasControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         denunciaRepository.deleteAll();
+        usuarioRepository.deleteAll();
         contaRepository.deleteAll();
 
         // Criar conta de teste

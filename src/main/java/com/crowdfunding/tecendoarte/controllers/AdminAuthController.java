@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Map;
 
@@ -23,32 +26,14 @@ public class AdminAuthController {
 
     private final AdministradorAuthServiceInterface administradorAuthService;
 
-    @Operation(
-        summary = "Login de administrador", 
-        description = "Realiza autenticação de administrador. Rota pública, não requer autenticação.",
-        responses = {
-            @ApiResponse(
-                responseCode = "200", 
-                description = "Login realizado com sucesso"
-            ),
-            @ApiResponse(
-                responseCode = "400", 
-                description = "Dados inválidos ou campos obrigatórios não preenchidos"
-            ),
-            @ApiResponse(
-                responseCode = "401", 
-                description = "Credenciais inválidas"
-            ),
-            @ApiResponse(
-                responseCode = "404", 
-                description = "Administrador não encontrado"
-            ),
-            @ApiResponse(
-                responseCode = "500", 
-                description = "Erro interno do servidor"
-            )
-        }
-    )
+    @Operation(summary = "Login de administrador", description = "Realiza autenticação de administrador. Rota pública, não requer autenticação.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Login realizado com sucesso", content = @Content(schema = @Schema(implementation = AdminLoginResponseDTO.class))),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos ou campos obrigatórios não preenchidos", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Credenciais inválidas", content = @Content),
+        @ApiResponse(responseCode = "404", description = "Administrador não encontrado", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor", content = @Content)
+    })
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody AdminLoginRequestDTO request) {
         try {

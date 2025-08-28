@@ -1,18 +1,28 @@
 package com.crowdfunding.tecendoarte.controllers;
 
 import org.springframework.web.bind.annotation.*;
+import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaRequestDTO;
+import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaResponseDTO;
 import com.crowdfunding.tecendoarte.services.implementations.ArtistaService;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
 import com.crowdfunding.tecendoarte.dto.ArtistaDTO.*;
 import jakarta.persistence.EntityNotFoundException;
-import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @Tag(name = "Artistas", description = "Operações relacionadas a artistas")
 @RestController
 @RequestMapping(
-        value = "api/artistas",
-        produces = MediaType.APPLICATION_JSON_VALUE
+    value = "api/artistas",
+    produces = MediaType.APPLICATION_JSON_VALUE
 )
 public class ArtistaController {
 

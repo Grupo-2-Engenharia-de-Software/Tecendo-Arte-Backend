@@ -12,9 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class UsuarioService implements UsuarioServiceInterface {
@@ -28,12 +25,17 @@ public class UsuarioService implements UsuarioServiceInterface {
         Conta conta = contaRepository.findById(dto.getContaId())
                 .orElseThrow(() -> new EntityNotFoundException("Conta nao encontrada"));
 
+        // valida se já existe usuário com essa conta
+        if (usuarioRepository.findByConta(conta).isPresent()) {
+            throw new IllegalArgumentException("Ja existe um usuario vinculado a essa conta.");
+        }
+
         Usuario usuario = Usuario.builder()
                 .conta(conta)
                 .interesses(dto.getInteresses())
                 .build();
 
-        usuarioRepository.save(usuario);
+        usuario = usuarioRepository.save(usuario);
 
         return toResponseDTO(usuario);
     }
@@ -41,7 +43,7 @@ public class UsuarioService implements UsuarioServiceInterface {
     @Override
     public UsuarioResponseDTO buscarPorId(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario nao encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("Usuario não encontrado"));
         return toResponseDTO(usuario);
     }
 
@@ -49,9 +51,11 @@ public class UsuarioService implements UsuarioServiceInterface {
     @Transactional
     public UsuarioResponseDTO atualizar(Long id, UsuarioRequestDTO dto) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario nao encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("Usuario não encontrado"));
 
         usuario.setInteresses(dto.getInteresses());
+
+        usuarioRepository.save(usuario); // 🔹 garantir persistência
 
         return toResponseDTO(usuario);
     }
@@ -60,7 +64,7 @@ public class UsuarioService implements UsuarioServiceInterface {
     @Transactional
     public void deletar(Long id) {
         if (!usuarioRepository.existsById(id)) {
-            throw new EntityNotFoundException("Usuario nao encontrado");
+            throw new EntityNotFoundException("Usuario não encontrado");
         }
         usuarioRepository.deleteById(id);
     }
