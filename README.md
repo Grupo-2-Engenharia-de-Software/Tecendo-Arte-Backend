@@ -25,18 +25,6 @@ Funcionalidades principais:
 - Swagger (em breve)
 - Docker (planejado)
 
-## Estrutura do Projeto
-
-src/
-├── main/
-│ ├── java/com/crowdfunding/tecendearte/
-│ └── resources/
-│ ├── static/
-│ └── templates/
-└── test/
-└── java/com/crowdfunding/tecendearte/
-
-
 ## Equipe (Backend)
 
 - Alex
