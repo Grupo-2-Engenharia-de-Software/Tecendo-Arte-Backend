@@ -5,10 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
 import java.util.ArrayList;
-import com.crowdfunding.tecendoarte.models.Interacao;
-import com.crowdfunding.tecendoarte.models.Denuncia;
-import com.crowdfunding.tecendoarte.models.Comentario;
-import com.crowdfunding.tecendoarte.models.Doacao;
 
 @Data
 @Builder

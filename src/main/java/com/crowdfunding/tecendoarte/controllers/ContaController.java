@@ -1,5 +1,4 @@
 package com.crowdfunding.tecendoarte.controllers;
-
 import org.springframework.web.bind.annotation.*;
 import com.crowdfunding.tecendoarte.dto.ContaDTO.*;
 import com.crowdfunding.tecendoarte.services.implementations.ContaService;
@@ -13,7 +12,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @Tag(name = "Contas", description = "Operações relacionadas a contas")
 @RestController
-@RequestMapping(value = "/api/conta", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/contas", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ContaController {
     private final ContaService contaService;
 

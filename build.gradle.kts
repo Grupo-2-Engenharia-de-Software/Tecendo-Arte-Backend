@@ -2,6 +2,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "3.5.4"
 	id("io.spring.dependency-management") version "1.1.7"
+    id("jacoco")
 }
 
 group = "com.crowdfunding"
@@ -48,4 +49,14 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	finalizedBy(tasks.jacocoTestReport) // gera o relatório após os testes
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // garante que os testes rodem antes
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco"))
+    }
 }
