@@ -27,7 +27,7 @@ public class Denuncia {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StatusDenuncia statusDenuncia;
+    private StatusDenuncia status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_adm")
@@ -43,8 +43,6 @@ public class Denuncia {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "projeto_id")
     private Projeto projeto;
-
-    private StatusDenuncia status;
 
     @Column(nullable = false)
     private LocalDateTime criadoEm;
