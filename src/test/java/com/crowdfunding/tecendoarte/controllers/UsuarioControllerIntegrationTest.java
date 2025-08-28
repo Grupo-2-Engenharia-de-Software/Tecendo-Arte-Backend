@@ -2,15 +2,12 @@ package com.crowdfunding.tecendoarte.controllers;
 
 import com.crowdfunding.tecendoarte.dto.ContaDTO.ContaRequestDTO;
 import com.crowdfunding.tecendoarte.dto.UsuarioDTO.UsuarioRequestDTO;
-import com.crowdfunding.tecendoarte.models.Conta;
 import com.crowdfunding.tecendoarte.models.Usuario;
 import com.crowdfunding.tecendoarte.models.enums.TipoArte;
 import com.crowdfunding.tecendoarte.models.enums.TipoConta;
 import com.crowdfunding.tecendoarte.repositories.ContaRepository;
 import com.crowdfunding.tecendoarte.repositories.UsuarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.transaction.Transactional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,24 +56,6 @@ class UsuarioControllerIntegrationTest {
                 .getContentAsString();
 
         return objectMapper.readTree(resp).get("idConta").asLong();
-    }
-
-    private Long criarUsuario(Long contaId, List<TipoArte> interesses) throws Exception {
-        UsuarioRequestDTO usuarioDto = new UsuarioRequestDTO();
-        usuarioDto.setContaId(contaId);
-        usuarioDto.setInteresses(interesses);
-
-        var resp = mockMvc.perform(post("/usuarios")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(usuarioDto)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.contaId").value(contaId))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        return objectMapper.readTree(resp).get("id").asLong();
     }
 
     // ---------- Testes ----------

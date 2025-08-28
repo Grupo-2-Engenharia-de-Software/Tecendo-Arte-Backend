@@ -51,11 +51,11 @@ public class UsuarioService implements UsuarioServiceInterface {
     @Transactional
     public UsuarioResponseDTO atualizar(Long id, UsuarioRequestDTO dto) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario nao encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("Usuario não encontrado"));
 
         usuario.setInteresses(dto.getInteresses());
 
-        usuario = usuarioRepository.save(usuario); // 🔹 garantir persistência
+        usuarioRepository.save(usuario); // 🔹 garantir persistência
 
         return toResponseDTO(usuario);
     }
@@ -64,7 +64,7 @@ public class UsuarioService implements UsuarioServiceInterface {
     @Transactional
     public void deletar(Long id) {
         if (!usuarioRepository.existsById(id)) {
-            throw new EntityNotFoundException("Usuario nao encontrado");
+            throw new EntityNotFoundException("Usuario não encontrado");
         }
         usuarioRepository.deleteById(id);
     }
