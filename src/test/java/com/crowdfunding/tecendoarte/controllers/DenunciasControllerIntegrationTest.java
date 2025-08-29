@@ -57,7 +57,6 @@ class DenunciasControllerIntegrationTest {
         usuarioRepository.deleteAll();
         contaRepository.deleteAll();
 
-        // Criar conta de teste
         contaTeste = Conta.builder()
                 .email("teste@teste.com")
                 .senha("senha123")
