@@ -14,4 +14,4 @@ public class ArtistaLoginResponseDTO {
     private String nome;
     private String email;
     private String token;
-} 
+}

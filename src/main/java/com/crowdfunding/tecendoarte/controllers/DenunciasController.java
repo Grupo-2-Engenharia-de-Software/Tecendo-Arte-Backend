@@ -1,4 +1,4 @@
-package com.crowdfunding.tecendoarte;
+package com.crowdfunding.tecendoarte.controllers;
 
 import com.crowdfunding.tecendoarte.dto.DenunciaDTO.AnaliseDenunciaRequestDTO;
 import com.crowdfunding.tecendoarte.dto.DenunciaDTO.ListarDenunciaResponseDTO;

@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false) // sem filtros de segurança nos testes
+@AutoConfigureMockMvc(addFilters = false) 
 class UsuarioControllerIntegrationTest {
 
     @Autowired private MockMvc mockMvc;
@@ -62,7 +62,7 @@ class UsuarioControllerIntegrationTest {
 
     @Test
     void criarUsuario_comContaValida_deveRetornarCriado() throws Exception {
-        Long contaId = criarConta(); // usuário já criado automaticamente
+        Long contaId = criarConta();
 
         Usuario usuario = usuarioRepository.findByContaId(contaId)
                 .orElseThrow(() -> new AssertionError("Usuario não foi criado automaticamente"));
@@ -74,7 +74,7 @@ class UsuarioControllerIntegrationTest {
 
     @Test
     void buscarUsuario_existente_deveRetornarOk() throws Exception {
-        Long contaId = criarConta(); // cria a conta e o usuário automático
+        Long contaId = criarConta();
         Usuario usuario = usuarioRepository.findByConta(contaRepository.findById(contaId).get()).get();
         Long usuarioId = usuario.getId();
 
@@ -86,12 +86,12 @@ class UsuarioControllerIntegrationTest {
 
     @Test
     void atualizarUsuario_mudarInteresses_deveRetornarOk() throws Exception {
-        Long contaId = criarConta(); // cria a conta e usuário automático
+        Long contaId = criarConta();
         Usuario usuario = usuarioRepository.findByConta(contaRepository.findById(contaId).get()).get();
         Long usuarioId = usuario.getId();
 
         UsuarioRequestDTO req = new UsuarioRequestDTO();
-        req.setContaId(contaId); // mantém a mesma conta
+        req.setContaId(contaId);
         req.setInteresses(List.of(TipoArte.FOTOGRAFIA));
 
         mockMvc.perform(put("/usuarios/{id}", usuarioId)
@@ -120,13 +120,11 @@ class UsuarioControllerIntegrationTest {
     @Test
     void criarUsuario_semConta_deveRetornarBadRequest() throws Exception {
         UsuarioRequestDTO req = new UsuarioRequestDTO();
-        // sem contaId
 
         mockMvc.perform(post("/usuarios")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isBadRequest())
-                // dependendo do teu handler, a mensagem pode variar; assert suave:
                 .andExpect(content().string(containsString("contaId")));
     }
 
@@ -144,7 +142,7 @@ class UsuarioControllerIntegrationTest {
 
     @Test
     void naoDeveCriarUsuarioSeContaJaPossuiUsuario() throws Exception {
-        Long contaId = criarConta(); // já cria o usuário automaticamente
+        Long contaId = criarConta();
 
         UsuarioRequestDTO segundo = new UsuarioRequestDTO();
         segundo.setContaId(contaId);

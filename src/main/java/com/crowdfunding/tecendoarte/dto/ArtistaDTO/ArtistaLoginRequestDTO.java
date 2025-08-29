@@ -16,4 +16,4 @@ public class ArtistaLoginRequestDTO {
 
     @NotBlank(message = "Senha obrigatoria.")
     private String senha;
-} 
+}
