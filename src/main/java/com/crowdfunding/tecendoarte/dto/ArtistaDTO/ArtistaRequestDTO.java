@@ -1,6 +1,8 @@
 package com.crowdfunding.tecendoarte.dto.ArtistaDTO;
 
 import java.util.List;
+import com.crowdfunding.tecendoarte.dto.ProjetoDTO.ProjetoResponseDTO;
+import com.crowdfunding.tecendoarte.models.Conta;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -11,20 +13,21 @@ import lombok.*;
 @AllArgsConstructor
 public class ArtistaRequestDTO {
 
-    @JsonProperty("nome")
-    @NotBlank(message = "Nome de Artista Obrigatorio!")
+    @NotBlank(message = "Nome obrigatorio!")
     private String nome;
 
-    @JsonProperty("email")
-    @NotBlank(message = "Email de Artista Obrigatorio!")
-    private String email;
+    @NotBlank(message = "Conta obrigatoria!")
+    private Conta conta;
 
-    @JsonProperty("senha")
-    @NotBlank(message = "Senha de Artista Obrigatoria!")
-    private String senha;
+    @NotBlank(message = "Descricao obrigatoria!")
+    private String descricao;
 
-    @JsonProperty("tiposArte")
-    @NotEmpty(message = "Tipos de Arte Obrigatorios!")
-    private List<@NotBlank String> tiposArte;
+    @NotEmpty(message = "Categorias obrigatorias!")
+    private List<@NotBlank String> categorias;
+
+    private List<ProjetoResponseDTO> projetos;
+
+    // A modelagem indica a necessidade do atributo "recompensas". 
+    // Não é necessário, pois são os projetos que possuem recompensas.
 
 }

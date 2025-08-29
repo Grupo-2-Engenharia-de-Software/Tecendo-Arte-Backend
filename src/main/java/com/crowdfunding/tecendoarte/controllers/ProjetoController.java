@@ -75,7 +75,7 @@ public class ProjetoController {
     private Long getIdArtistaAutenticado() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = (String) authentication.getPrincipal();
-        return artistaRepository.findByEmail(email)
+        return artistaRepository.findByContaEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."))
                 .getId();
     }

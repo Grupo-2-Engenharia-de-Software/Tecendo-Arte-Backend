@@ -3,8 +3,11 @@ package com.crowdfunding.tecendoarte.models.enums;
 public enum TipoArte {
     PINTURA,
     ESCULTURA,
+    CERÂMICA,
     FOTOGRAFIA,
     DESENHO,
-    // Outros tipos de arte podem ser adicionados aqui
+    VIDEOARTE,
+    PERFORMANCE,
+    INSTALAÇÃO,
     OUTRO
 }
