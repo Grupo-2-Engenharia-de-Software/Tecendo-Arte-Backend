@@ -1,7 +1,6 @@
 package com.crowdfunding.tecendoarte.services.implementations;
 
 import com.crowdfunding.tecendoarte.dto.ContaDTO.*;
-import com.crowdfunding.tecendoarte.models.Artista;
 import com.crowdfunding.tecendoarte.models.Conta;
 import com.crowdfunding.tecendoarte.models.Usuario;
 import com.crowdfunding.tecendoarte.models.enums.TipoConta;
@@ -21,7 +20,6 @@ public class ContaService implements ContaServiceInterface {
 
     private final ContaRepository contaRepository;
     private final UsuarioRepository usuarioRepository;
-    private final ArtistaRepository artistaRepository;
     private final PasswordEncoder passwordEncoder;
 
     public ContaService(
@@ -32,7 +30,6 @@ public class ContaService implements ContaServiceInterface {
         this.contaRepository = contaRepository;
         this.passwordEncoder = passwordEncoder;
         this.usuarioRepository = usuarioRepository;
-        this.artistaRepository = artistaRepository;
     }
 
     @Override

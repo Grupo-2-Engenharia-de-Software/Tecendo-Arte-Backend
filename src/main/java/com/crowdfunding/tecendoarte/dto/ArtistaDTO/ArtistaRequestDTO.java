@@ -2,7 +2,6 @@ package com.crowdfunding.tecendoarte.dto.ArtistaDTO;
 
 import java.util.List;
 import com.crowdfunding.tecendoarte.dto.ProjetoDTO.ProjetoResponseDTO;
-import com.crowdfunding.tecendoarte.models.Conta;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -12,16 +11,13 @@ import lombok.*;
 @AllArgsConstructor
 public class ArtistaRequestDTO {
 
-    @NotBlank(message = "Nome obrigatorio!")
-    private String nome;
-
-    @NotBlank(message = "Conta obrigatoria!")
-    private Conta conta;
+    @NotNull(message = "Id da conta obrigatorio!")
+    private Long contaId;
 
     @NotBlank(message = "Descricao obrigatoria!")
     private String descricao;
 
-    @NotEmpty(message = "Categorias obrigatorias!")
+    @NotEmpty(message = "Pelo menos uma categoria deve ser informada.")
     private List<@NotBlank String> categorias;
 
     private List<ProjetoResponseDTO> projetos;

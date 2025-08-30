@@ -18,9 +18,6 @@ public class Artista {
     @Column(name = "id_artista", nullable = false, unique = true)
     private Long id;
 
-    @Column(name = "nome_artista", nullable = false, unique = true)
-    private String nome;
-
     @OneToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "id_conta", referencedColumnName = "idConta", nullable = false, unique = true)
     private Conta conta;
