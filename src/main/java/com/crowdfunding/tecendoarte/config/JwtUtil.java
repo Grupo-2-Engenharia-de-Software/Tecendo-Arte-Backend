@@ -54,6 +54,20 @@ public class JwtUtil {
                 .compact();
     }
 
+    public String generateTokenForUsuario(Long usuarioId, String email) {
+        Instant now = Instant.now();
+        return Jwts.builder()
+                .subject(email)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusSeconds(expirationSeconds)))
+                .claims(Map.of(
+                        "uid", usuarioId,
+                        "role", "USUARIO"
+                ))
+                .signWith(secretKey)
+                .compact();
+    }
+
     public boolean isTokenValid(String token) {
         try {
             Claims claims = parseAllClaims(token);

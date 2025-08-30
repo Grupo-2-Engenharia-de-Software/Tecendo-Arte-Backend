@@ -2,13 +2,17 @@ package com.crowdfunding.tecendoarte.services.implementations;
 
 import com.crowdfunding.tecendoarte.dto.UsuarioDTO.UsuarioRequestDTO;
 import com.crowdfunding.tecendoarte.dto.UsuarioDTO.UsuarioResponseDTO;
+import com.crowdfunding.tecendoarte.dto.UsuarioDTO.UsuarioLoginRequestDTO;
+import com.crowdfunding.tecendoarte.dto.UsuarioDTO.UsuarioLoginResponseDTO;
 import com.crowdfunding.tecendoarte.models.Conta;
 import com.crowdfunding.tecendoarte.models.Usuario;
 import com.crowdfunding.tecendoarte.repositories.ContaRepository;
 import com.crowdfunding.tecendoarte.repositories.UsuarioRepository;
 import com.crowdfunding.tecendoarte.services.interfaces.UsuarioServiceInterface;
+import com.crowdfunding.tecendoarte.config.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +22,8 @@ public class UsuarioService implements UsuarioServiceInterface {
 
     private final UsuarioRepository usuarioRepository;
     private final ContaRepository contaRepository;
+    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -67,6 +73,30 @@ public class UsuarioService implements UsuarioServiceInterface {
             throw new EntityNotFoundException("Usuario não encontrado");
         }
         usuarioRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public UsuarioLoginResponseDTO login(UsuarioLoginRequestDTO dto) {
+        Conta conta = contaRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        if (!passwordEncoder.matches(dto.getSenha(), conta.getSenha())) {
+            throw new IllegalArgumentException("Senha incorreta");
+        }
+
+        Usuario usuario = usuarioRepository.findByConta(conta)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        String token = jwtUtil.generateTokenForUsuario(usuario.getId(), conta.getEmail());
+
+        return new UsuarioLoginResponseDTO(
+                token,
+                conta.getEmail(),
+                conta.getNome(),
+                usuario.getId(),
+                conta.getTipoConta().toString()
+        );
     }
 
     private UsuarioResponseDTO toResponseDTO(Usuario usuario) {
