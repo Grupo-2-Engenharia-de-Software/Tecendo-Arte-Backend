@@ -2,8 +2,10 @@ package com.crowdfunding.tecendoarte.services.implementations;
 
 import org.springframework.stereotype.Service;
 import com.crowdfunding.tecendoarte.models.Artista;
+import com.crowdfunding.tecendoarte.models.Conta;
 import com.crowdfunding.tecendoarte.models.enums.TipoArte;
 import com.crowdfunding.tecendoarte.repositories.ArtistaRepository;
+import com.crowdfunding.tecendoarte.repositories.ContaRepository;
 import com.crowdfunding.tecendoarte.services.interfaces.ArtistaServiceInterface;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,50 +13,30 @@ import com.crowdfunding.tecendoarte.dto.ArtistaDTO.*;
 import com.crowdfunding.tecendoarte.config.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class ArtistaService implements ArtistaServiceInterface {
 
     private final ArtistaRepository artistaRepository;
+    private final ContaRepository contaRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    
-    public ArtistaService(ArtistaRepository artistaRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
-        this.artistaRepository = artistaRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtUtil = jwtUtil;
-    }
 
     @Override
     public ArtistaResponseDTO cadastrarArtista(ArtistaRequestDTO request) {
+        Conta conta = contaRepository.findById(request.getContaId())
+                .orElseThrow(() -> new EntityNotFoundException("Conta nao encontrada"));
 
-        if (request == null) {
-            throw new IllegalArgumentException("Requisição não pode ser nula.");
-        }
-        if (this.isBlank(request.getNome())) {
-            throw new IllegalArgumentException("Nome obrigatório.");
-        }
-        if (isBlank(request.getConta().getEmail()) || isBlank(request.getConta().getSenha())) {
-            throw new IllegalArgumentException("Dados da conta obrigatórios.");
-        }
-        if (this.isBlank(request.getDescricao())) {
-            throw new IllegalArgumentException("Descrição obrigatória.");
-        }
-        if (this.isBlank(request.getCategorias().toString())) {
-            throw new IllegalArgumentException("Pelo menos uma categoria deve ser informada.");
-        }
-        this.artistaRepository.findByNomeContainingIgnoreCase(request.getNome()).ifPresent(artista -> {
-            throw new IllegalArgumentException("Artista com este nome já cadastrado.");
-        });
-        this.artistaRepository.findByContaEmail(request.getConta().getEmail()).ifPresent(artista -> {
-            throw new IllegalArgumentException("Artista com este e-mail já cadastrado.");
+        this.artistaRepository.findByContaId(request.getContaId()).ifPresent(artista -> {
+            throw new IllegalArgumentException("Artista com esta conta já cadastrado.");
         });
 
         List<TipoArte> categorias = this.parseTiposArte(request.getCategorias());
-        
+
         Artista artista = Artista.builder()
-                .nome(request.getNome())
-                .conta(request.getConta())
+                .conta(conta)
                 .descricao(request.getDescricao())
                 .categorias(categorias)
                 .projetos(List.of())
@@ -63,13 +45,13 @@ public class ArtistaService implements ArtistaServiceInterface {
         Artista salvo = this.artistaRepository.save(artista);
 
         return ArtistaResponseDTO.builder()
-                .nome(salvo.getNome())
+                .nome(conta.getNome())
                 .descricao(salvo.getDescricao())
                 .categorias(salvo.getCategorias().stream().map(TipoArte::name).collect(Collectors.toList()))
                 .projetos(List.of())
                 .build();
     }
-    
+
     @Override
     public ArtistaLoginResponseDTO login(ArtistaLoginRequestDTO request) {
 
@@ -84,10 +66,12 @@ public class ArtistaService implements ArtistaServiceInterface {
             throw new IllegalArgumentException("Senha inválida.");
         }
 
+        Conta conta = artista.getConta();
+
         String token = this.jwtUtil.generateTokenForArtista(artista.getId(), artista.getConta().getEmail());
 
         return ArtistaLoginResponseDTO.builder()
-                .nome(artista.getNome())
+                .nome(conta.getNome())
                 .email(artista.getConta().getEmail())
                 .token(token)
                 .build();
@@ -100,11 +84,13 @@ public class ArtistaService implements ArtistaServiceInterface {
             throw new IllegalArgumentException("Nome para busca obrigatório.");
         }
 
-        Artista artista = this.artistaRepository.findByNomeContainingIgnoreCase(nome)
+        Artista artista = this.artistaRepository.findByContaNomeContainingIgnoreCase(nome)
                 .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
 
+        Conta conta = artista.getConta();
+
         return ArtistaResponseDTO.builder()
-                .nome(artista.getNome())
+                .nome(conta.getNome())
                 .descricao(artista.getDescricao())
                 .categorias(artista.getCategorias().stream().map(TipoArte::name).collect(Collectors.toList()))
                 .projetos(List.of())
@@ -119,10 +105,10 @@ public class ArtistaService implements ArtistaServiceInterface {
         if (artistas.isEmpty()) {
             throw new EntityNotFoundException("Nenhum artista encontrado.");
         }
-        
+
         return artistas.stream()
                 .map(artista -> ArtistaResponseDTO.builder()
-                        .nome(artista.getNome())
+                        .nome(artista.getConta().getNome())
                         .descricao(artista.getDescricao())
                         .categorias(artista.getCategorias().stream().map(TipoArte::name).collect(Collectors.toList()))
                         .projetos(List.of())
@@ -133,29 +119,8 @@ public class ArtistaService implements ArtistaServiceInterface {
     @Override
     public ArtistaResponseDTO atualizarArtista(String nome, ArtistaRequestDTO request) {
 
-        if (this.isBlank(nome)) {
-            throw new IllegalArgumentException("Nome para busca obrigatório.");
-        }
-        if (request == null) {
-            throw new IllegalArgumentException("Requisição não pode ser nula.");
-        }
-        if (this.isBlank(request.getNome())) {
-            throw new IllegalArgumentException("Nome obrigatório.");
-        }
-        if (isBlank(request.getConta().getEmail()) || isBlank(request.getConta().getSenha())) {
-            throw new IllegalArgumentException("Dados da conta obrigatórios.");
-        }
-        this.artistaRepository.findByNomeContainingIgnoreCase(request.getNome()).ifPresent(artista -> {
-            throw new IllegalArgumentException("Artista com este nome já cadastrado.");
-        });
-        this.artistaRepository.findByContaEmail(request.getConta().getEmail()).ifPresent(artista -> {
-            throw new IllegalArgumentException("Artista com este e-mail já cadastrado.");
-        });
-
-        Artista artista = this.artistaRepository.findByNomeContainingIgnoreCase(nome)
+        Artista artista = this.artistaRepository.findByContaNomeContainingIgnoreCase(nome)
                 .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
-
-        artista.setNome(request.getNome());
 
         if (!this.isBlank(request.getDescricao())) {
             artista.setDescricao(request.getDescricao());
@@ -170,7 +135,7 @@ public class ArtistaService implements ArtistaServiceInterface {
         Artista atualizado = this.artistaRepository.save(artista);
 
         return ArtistaResponseDTO.builder()
-                .nome(atualizado.getNome())
+                .nome(atualizado.getConta().getNome())
                 .descricao(atualizado.getDescricao())
                 .categorias(atualizado.getCategorias().stream().map(TipoArte::name).collect(Collectors.toList()))
                 .projetos(List.of())
@@ -183,7 +148,7 @@ public class ArtistaService implements ArtistaServiceInterface {
             throw new IllegalArgumentException("Nome obrigatório.");
         }
 
-        Artista artista = this.artistaRepository.findByNomeContainingIgnoreCase(nome)
+        Artista artista = this.artistaRepository.findByContaNomeContainingIgnoreCase(nome)
                 .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
 
         this.artistaRepository.delete(artista);

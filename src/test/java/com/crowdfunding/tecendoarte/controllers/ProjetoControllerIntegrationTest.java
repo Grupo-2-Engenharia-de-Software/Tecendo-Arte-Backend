@@ -68,7 +68,6 @@ class ProjetoControllerIntegrationTest {
                 .build();
 
         artista = Artista.builder()
-                .nome("Artista Teste")
                 .conta(conta)
                 .descricao("Artista de pintura")
                 .categorias(List.of(TipoArte.PINTURA))
@@ -207,7 +206,7 @@ class ProjetoControllerIntegrationTest {
         projetoRepository.saveAll(List.of(projeto1, projeto2));
 
         mockMvc.perform(get("/projetos/consultar-por-artista")
-                        .param("nomeArtista", artista.getNome()))
+                        .param("nomeArtista", artista.getConta().getNome()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].titulo").value("Projeto A"))
                 .andExpect(jsonPath("$[1].titulo").value("Projeto B"));

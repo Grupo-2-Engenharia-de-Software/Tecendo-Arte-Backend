@@ -88,7 +88,7 @@ public class ProjetoService implements ProjetoServiceInterface {
 
     @Transactional(readOnly = true)
     public List<ProjetoResponseDTO> consultarProjetosPorArtista(String nomeArtista) {
-        Artista artista = artistaRepository.findByNome(nomeArtista)
+        Artista artista = artistaRepository.findByContaNomeContainingIgnoreCase(nomeArtista)
                 .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
         return projetoRepository.findByArtistaId(artista.getId()).stream()
                 .map(this::toResponseDTO)
@@ -113,7 +113,7 @@ public class ProjetoService implements ProjetoServiceInterface {
                 .dataCriacao(projeto.getDataCriacao())
                 .status(projeto.getStatus())
                 .tipoArte(projeto.getTipoArte())
-                .nomeArtista(projeto.getArtista().getNome())
+                .nomeArtista(projeto.getArtista().getConta().getNome())
                 .build();
     }
 }
