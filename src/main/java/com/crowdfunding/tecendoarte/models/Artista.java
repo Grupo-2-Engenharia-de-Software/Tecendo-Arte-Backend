@@ -18,7 +18,7 @@ public class Artista {
     @Column(name = "id_artista", nullable = false, unique = true)
     private Long id;
 
-    @OneToOne(optional = false, cascade = CascadeType.ALL)
+    @OneToOne(optional = false, cascade = CascadeType.MERGE)
     @JoinColumn(name = "id_conta", referencedColumnName = "idConta", nullable = false, unique = true)
     private Conta conta;
 
