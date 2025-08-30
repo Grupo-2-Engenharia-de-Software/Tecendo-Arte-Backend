@@ -8,5 +8,5 @@ public interface ArtistaRepository extends JpaRepository<Artista, Long> {
     
     Optional<Artista> findByContaEmail(String email);
     Optional<Artista> findByNomeContainingIgnoreCase(String nome);
-
+    Optional<Artista> findByNome(String nome);
 }

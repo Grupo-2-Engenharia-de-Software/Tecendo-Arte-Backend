@@ -12,8 +12,12 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -80,6 +84,23 @@ public class ProjetoService implements ProjetoServiceInterface {
     private Projeto buscarProjetoPorId(Long idProjeto) {
         return projetoRepository.findById(idProjeto)
                 .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado."));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjetoResponseDTO> consultarProjetosPorArtista(String nomeArtista) {
+        Artista artista = artistaRepository.findByNome(nomeArtista)
+                .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
+        return projetoRepository.findByArtistaId(artista.getId()).stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public Long getIdArtistaAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) authentication.getPrincipal();
+        return artistaRepository.findByContaEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."))
+                .getId();
     }
 
     private ProjetoResponseDTO toResponseDTO(Projeto projeto) {
