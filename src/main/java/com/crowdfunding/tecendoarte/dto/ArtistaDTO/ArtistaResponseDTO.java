@@ -1,8 +1,7 @@
 package com.crowdfunding.tecendoarte.dto.ArtistaDTO;
 
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.*;
+import com.crowdfunding.tecendoarte.dto.ProjetoDTO.ProjetoResponseDTO;
 import lombok.*;
 
 @Data
@@ -11,16 +10,9 @@ import lombok.*;
 @AllArgsConstructor
 public class ArtistaResponseDTO {
 
-    @JsonProperty("nome")
-    @NotBlank(message = "Nome de Artista Obrigatorio!")
     private String nome;
-
-    @JsonProperty("email")
-    @NotBlank(message = "Email de Artista Obrigatorio!")
-    private String email;
-
-    @JsonProperty("tiposArte")
-    @NotEmpty(message = "Tipos de Arte Obrigatorios!")
-    private List<@NotBlank String> tiposArte;
+    private String descricao;
+    private List<String> categorias;
+    private List<ProjetoResponseDTO> projetos;
     
 }
