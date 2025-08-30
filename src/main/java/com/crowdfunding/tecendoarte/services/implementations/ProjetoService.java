@@ -92,7 +92,7 @@ public class ProjetoService implements ProjetoServiceInterface {
                 .dataCriacao(projeto.getDataCriacao())
                 .status(projeto.getStatus())
                 .tipoArte(projeto.getTipoArte())
-                .nomeArtista(projeto.getArtista().getNome())
+                .nomeArtista(projeto.getArtista().getConta().getNome())
                 .build();
     }
 }
