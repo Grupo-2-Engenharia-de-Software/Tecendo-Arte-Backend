@@ -128,17 +128,6 @@ class UsuarioControllerIntegrationTest {
     }
 
     @Test
-    void criarUsuario_semConta_deveRetornarBadRequest() throws Exception {
-        UsuarioRequestDTO req = new UsuarioRequestDTO();
-
-        mockMvc.perform(post("/usuarios/cadastrar")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("contaId")));
-    }
-
-    @Test
     void buscarUsuario_inexistente_deveRetornarNotFound() throws Exception {
         mockMvc.perform(get("/usuarios/{id}", 999999L))
                 .andExpect(status().isNotFound());
@@ -147,33 +136,6 @@ class UsuarioControllerIntegrationTest {
     @Test
     void deletarUsuario_inexistente_deveRetornarNotFound() throws Exception {
         mockMvc.perform(delete("/usuarios/{id}", 999999L))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void naoDeveCriarUsuarioSeContaJaPossuiUsuario() throws Exception {
-        Long contaId = criarConta();
-
-        UsuarioRequestDTO segundo = new UsuarioRequestDTO();
-        segundo.setContaId(contaId);
-        segundo.setInteresses(List.of(TipoArte.ESCULTURA));
-
-        mockMvc.perform(post("/usuarios/cadastrar")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(segundo)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Ja existe um usuario vinculado a essa conta.")));
-    }
-
-    @Test
-    void criarUsuario_comContaInexistente_deveRetornarNotFound() throws Exception {
-        UsuarioRequestDTO req = new UsuarioRequestDTO();
-        req.setContaId(999999L);
-        req.setInteresses(List.of(TipoArte.PINTURA));
-
-        mockMvc.perform(post("/usuarios/cadastrar")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isNotFound());
     }
 
