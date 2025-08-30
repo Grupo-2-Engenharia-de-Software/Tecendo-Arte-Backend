@@ -2,6 +2,8 @@ package com.crowdfunding.tecendoarte.controllers;
 
 import com.crowdfunding.tecendoarte.dto.UsuarioDTO.UsuarioRequestDTO;
 import com.crowdfunding.tecendoarte.dto.UsuarioDTO.UsuarioResponseDTO;
+import com.crowdfunding.tecendoarte.dto.UsuarioDTO.UsuarioLoginRequestDTO;
+import com.crowdfunding.tecendoarte.dto.UsuarioDTO.UsuarioLoginResponseDTO;
 import com.crowdfunding.tecendoarte.services.implementations.UsuarioService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -33,13 +35,29 @@ public class UsuarioController {
         @ApiResponse(responseCode = "400", description = "Dados inválidos ou campos obrigatórios não preenchidos", content = @Content),
         @ApiResponse(responseCode = "500", description = "Erro interno do servidor", content = @Content)
     })
-    @PostMapping
+    @PostMapping("/cadastrar")
     public ResponseEntity<?> criar(@RequestBody @Valid UsuarioRequestDTO dto) {
         try {
             UsuarioResponseDTO response = usuarioService.criar(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Operation(summary = "Efetuar login", description = "Efetua login do usuário. Não requer autenticação")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Login realizado com sucesso", content = @Content(schema = @Schema(implementation = UsuarioLoginResponseDTO.class))),
+        @ApiResponse(responseCode = "400", description = "Credenciais inválidas ou usuário não encontrado", content = @Content),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor", content = @Content)
+    })
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody @Valid UsuarioLoginRequestDTO dto) {
+        try {
+            UsuarioLoginResponseDTO response = usuarioService.login(dto);
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
