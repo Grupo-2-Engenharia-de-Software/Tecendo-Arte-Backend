@@ -25,18 +25,6 @@ Funcionalidades principais:
 - Swagger
 - Docker
 
-## Estrutura do Projeto
-
-src/
-├── main/
-│ ├── java/com/crowdfunding/tecendearte/
-│ └── resources/
-│ ├── static/
-│ └── templates/
-└── test/
-└── java/com/crowdfunding/tecendearte/
-
-
 ## Equipe (Backend)
 
 - Alex
@@ -82,3 +70,8 @@ Após executar a aplicação, a documentação interativa da API estará dispon�
 **http://localhost:8080/swagger-ui/index.html**
 
 A documentação inclui todas as rotas disponíveis e parâmetros necessários.
+# Rode a aplicação
+./gradlew bootRun
+
+# Rode os testes da aplicação
+./gradlew test
