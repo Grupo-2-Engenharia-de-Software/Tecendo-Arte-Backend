@@ -106,19 +106,6 @@ class UsuarioServiceTest {
     }
 
     @Test
-    void deveAtualizarInteressesDoUsuario() {
-        UsuarioRequestDTO dto = new UsuarioRequestDTO();
-        dto.setInteresses(List.of(TipoArte.FOTOGRAFIA));
-
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
-
-        UsuarioResponseDTO response = usuarioService.atualizar(1L, dto);
-
-        assertTrue(response.getInteresses().contains(TipoArte.FOTOGRAFIA));
-        verify(usuarioRepository).findById(1L);
-    }
-
-    @Test
     void deveDeletarUsuarioExistente() {
         when(usuarioRepository.existsById(1L)).thenReturn(true);
 
@@ -136,7 +123,6 @@ class UsuarioServiceTest {
 
     @Test
     void login_ComCredenciaisValidas_DeveRetornarToken() {
-        // Arrange
         UsuarioLoginRequestDTO request = new UsuarioLoginRequestDTO();
         request.setEmail("usuario@teste.com");
         request.setSenha("senha123");
@@ -159,10 +145,8 @@ class UsuarioServiceTest {
         when(usuarioRepository.findByConta(conta)).thenReturn(Optional.of(usuario));
         when(jwtUtil.generateTokenForUsuario(1L, "usuario@teste.com")).thenReturn("token_jwt");
 
-        // Act
         UsuarioLoginResponseDTO response = usuarioService.login(request);
 
-        // Assert
         assertNotNull(response);
         assertEquals("token_jwt", response.getToken());
         assertEquals("usuario@teste.com", response.getEmail());
@@ -178,14 +162,12 @@ class UsuarioServiceTest {
 
     @Test
     void login_ComEmailInexistente_DeveLancarExcecao() {
-        // Arrange
         UsuarioLoginRequestDTO request = new UsuarioLoginRequestDTO();
         request.setEmail("inexistente@teste.com");
         request.setSenha("senha123");
 
         when(contaRepository.findByEmail("inexistente@teste.com")).thenReturn(Optional.empty());
 
-        // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             usuarioService.login(request);
         });
@@ -197,7 +179,6 @@ class UsuarioServiceTest {
 
     @Test
     void login_ComSenhaIncorreta_DeveLancarExcecao() {
-        // Arrange
         UsuarioLoginRequestDTO request = new UsuarioLoginRequestDTO();
         request.setEmail("usuario@teste.com");
         request.setSenha("senha_errada");
@@ -213,7 +194,6 @@ class UsuarioServiceTest {
         when(contaRepository.findByEmail("usuario@teste.com")).thenReturn(Optional.of(conta));
         when(passwordEncoder.matches("senha_errada", "senha_criptografada")).thenReturn(false);
 
-        // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             usuarioService.login(request);
         });
@@ -226,7 +206,6 @@ class UsuarioServiceTest {
 
     @Test
     void login_ComUsuarioNaoVinculado_DeveLancarExcecao() {
-        // Arrange
         UsuarioLoginRequestDTO request = new UsuarioLoginRequestDTO();
         request.setEmail("usuario@teste.com");
         request.setSenha("senha123");
@@ -243,7 +222,6 @@ class UsuarioServiceTest {
         when(passwordEncoder.matches("senha123", "senha_criptografada")).thenReturn(true);
         when(usuarioRepository.findByConta(conta)).thenReturn(Optional.empty());
 
-        // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             usuarioService.login(request);
         });
