@@ -119,6 +119,17 @@ class ArtistaControllerIntegrationTest {
                 .andExpect(content().string(containsString("Tipo de arte inválido")));
     }
 
+    @Test
+    void naoDeveCadastrarArtistaSemCategorias() throws Exception {
+        String payload = buildCadastroRequestJson(conta.getIdConta(), "Artista sem categorias", List.of());
+        
+        mockMvc.perform(post("/api/artistas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("Falha de validacao nos campos.")));
+    }
+
     // ---------- TESTES DE LOGIN ----------
 
     @Test
@@ -168,6 +179,17 @@ class ArtistaControllerIntegrationTest {
                         .content(payload))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(containsString("Senha inválida")));
+    }
+
+    @Test
+    void deveFalharLoginCamposVazios() throws Exception {
+        String payload = buildLoginRequestJson("", "");
+
+        mockMvc.perform(post("/api/artistas/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("Falha de validacao nos campos.")));
     }
 
     // ---------- TESTES DE BUSCA / LISTAGEM ----------
@@ -221,6 +243,14 @@ class ArtistaControllerIntegrationTest {
                 .andExpect(content().string(containsString("Nenhum artista encontrado")));
     }
 
+    @Test
+    void deveFalharBuscarComNomeVazio() throws Exception {
+        mockMvc.perform(get("/api/artistas/buscar")
+                        .param("nome", ""))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("Nome para busca obrigatório")));
+    }
+
     // ---------- TESTES DE ATUALIZAR / DELETAR ----------
 
     @Test
@@ -263,5 +293,13 @@ class ArtistaControllerIntegrationTest {
                         .param("nome", "NaoExiste"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(containsString("Artista não encontrado")));
+    }
+
+    @Test
+    void deveFalharDeletarComNomeVazio() throws Exception {
+        mockMvc.perform(delete("/api/artistas/deletar")
+                        .param("nome", ""))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("Nome obrigatório")));
     }
 }
