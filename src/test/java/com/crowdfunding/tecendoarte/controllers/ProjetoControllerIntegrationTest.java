@@ -7,6 +7,7 @@ import com.crowdfunding.tecendoarte.models.enums.TipoArte;
 import com.crowdfunding.tecendoarte.models.enums.TipoConta;
 import com.crowdfunding.tecendoarte.models.enums.StatusProjeto;
 import com.crowdfunding.tecendoarte.repositories.ArtistaRepository;
+import com.crowdfunding.tecendoarte.repositories.ContaRepository;
 import com.crowdfunding.tecendoarte.repositories.ProjetoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,9 @@ class ProjetoControllerIntegrationTest {
     private ProjetoRepository projetoRepository;
 
     @Autowired
+    private ContaRepository contaRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -58,6 +62,7 @@ class ProjetoControllerIntegrationTest {
     void setUp() {
         projetoRepository.deleteAll();
         artistaRepository.deleteAll();
+        contaRepository.deleteAll();
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
         Conta conta = Conta.builder()
@@ -66,6 +71,7 @@ class ProjetoControllerIntegrationTest {
                 .senha(passwordEncoder.encode("senha123"))
                 .tipoConta(TipoConta.ARTISTA)
                 .build();
+        conta = contaRepository.save(conta);
 
         artista = Artista.builder()
                 .conta(conta)
