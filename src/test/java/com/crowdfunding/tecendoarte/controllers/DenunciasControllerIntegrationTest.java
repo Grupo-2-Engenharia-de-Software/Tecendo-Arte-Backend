@@ -108,7 +108,6 @@ class DenunciasControllerIntegrationTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").value(org.hamcrest.Matchers.hasSize(2)))
-                // A ordem de retorno provavelmente é por ID, que é crescente, então a primeira denúncia (d1) deve vir primeiro.
                 .andExpect(jsonPath("$[0].id").value(d1.getId()))
                 .andExpect(jsonPath("$[0].tipo").value("PROJETO"))
                 .andExpect(jsonPath("$[0].idAlvo").value(1))
