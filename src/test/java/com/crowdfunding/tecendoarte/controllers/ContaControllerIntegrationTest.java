@@ -45,8 +45,8 @@ class ContaControllerIntegrationTest {
         contaDTO.setTipoConta(TipoConta.USUARIO);
 
         String response = mockMvc.perform(post("/contas")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(contaDTO)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(contaDTO)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
@@ -65,8 +65,8 @@ class ContaControllerIntegrationTest {
         dto.setTipoConta(TipoConta.USUARIO);
 
         mockMvc.perform(post("/contas")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.idConta").exists())
                 .andExpect(jsonPath("$.nome").value("Maria"))
@@ -75,7 +75,7 @@ class ContaControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = {"USER"})
+    @WithMockUser(username = "admin", roles = { "USER" })
     void buscarConta_porId() throws Exception {
         String response = mockMvc.perform(get("/contas/{id}", contaIdCriada))
                 .andExpect(status().isOk())
@@ -90,7 +90,7 @@ class ContaControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = {"USER"})
+    @WithMockUser(username = "admin", roles = { "USER" })
     void atualizarConta_sucesso() throws Exception {
         ContaRequestDTO dto = new ContaRequestDTO();
         dto.setNome("NomeAtualizado");
@@ -99,8 +99,8 @@ class ContaControllerIntegrationTest {
         dto.setTipoConta(TipoConta.USUARIO);
 
         String response = mockMvc.perform(put("/contas/{id}", contaIdCriada)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -112,7 +112,7 @@ class ContaControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = {"USER"})
+    @WithMockUser(username = "admin", roles = { "USER" })
     void deletarConta_sucesso() throws Exception {
         mockMvc.perform(delete("/contas/{id}", contaIdCriada))
                 .andExpect(status().isNoContent());
@@ -134,24 +134,64 @@ class ContaControllerIntegrationTest {
 
         // 1ª vez → deve criar
         mockMvc.perform(post("/contas")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated());
 
         // 2ª vez (mesmo e-mail) → deve falhar
         mockMvc.perform(post("/contas")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("email")));
     }
 
-
-
     @Test
-    @WithMockUser(username = "admin", roles = {"USER"})
+    @WithMockUser(username = "admin", roles = { "USER" })
     void buscarConta_inexistente_deveRetornar404() throws Exception {
         mockMvc.perform(get("/contas/{id}", 99999L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    void criarConta_dtoInvalido_deveRetornar400() throws Exception {
+        ContaRequestDTO dto = new ContaRequestDTO();
+        dto.setNome("Teste Invalido");
+        dto.setEmail("");
+        dto.setSenha("123456");
+        dto.setTipoConta(TipoConta.USUARIO);
+
+        String response = mockMvc.perform(post("/contas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+                
+        assertThat(response).contains("O email é obrigatório");
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = { "USER" })
+    void atualizarConta_inexistente_deveRetornar404() throws Exception {
+        ContaRequestDTO dto = new ContaRequestDTO();
+        dto.setNome("NomeAtualizado");
+        dto.setEmail("atualizado" + System.currentTimeMillis() + "@example.com");
+        dto.setSenha("novaSenha");
+        dto.setTipoConta(TipoConta.USUARIO);
+
+        mockMvc.perform(put("/contas/{id}", 99999L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = { "USER" })
+    void deletarConta_inexistente_deveRetornar404() throws Exception {
+        mockMvc.perform(delete("/contas/{id}", 99999L))
                 .andExpect(status().isNotFound());
     }
 }

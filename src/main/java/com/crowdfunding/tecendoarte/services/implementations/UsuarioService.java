@@ -59,9 +59,13 @@ public class UsuarioService implements UsuarioServiceInterface {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario não encontrado"));
 
+        Conta conta = contaRepository.findById(dto.getContaId())
+                .orElseThrow(() -> new IllegalArgumentException("ID da conta inválido"));
+
+        usuario.setConta(conta);
         usuario.setInteresses(dto.getInteresses());
 
-        usuarioRepository.save(usuario); // 🔹 garantir persistência
+        usuarioRepository.save(usuario);
 
         return toResponseDTO(usuario);
     }
