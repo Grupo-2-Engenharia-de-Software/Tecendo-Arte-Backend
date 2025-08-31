@@ -9,6 +9,7 @@ import com.crowdfunding.tecendoarte.models.enums.StatusProjeto;
 import com.crowdfunding.tecendoarte.repositories.ArtistaRepository;
 import com.crowdfunding.tecendoarte.repositories.ContaRepository;
 import com.crowdfunding.tecendoarte.repositories.ProjetoRepository;
+import com.crowdfunding.tecendoarte.repositories.UsuarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -49,6 +51,9 @@ class ProjetoControllerIntegrationTest {
     private ContaRepository contaRepository;
 
     @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -60,10 +65,15 @@ class ProjetoControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+
         projetoRepository.deleteAll();
         artistaRepository.deleteAll();
+        usuarioRepository.deleteAll(); // Adicionado para garantir que a tabela USUARIO seja limpa antes da CONTA
         contaRepository.deleteAll();
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                .apply(springSecurity())
+                .build();
 
         Conta conta = Conta.builder()
                 .nome("Artista Teste")
@@ -80,6 +90,7 @@ class ProjetoControllerIntegrationTest {
                 .build();
         artista = artistaRepository.save(artista);
     }
+
 
     private String buildProjetoRequestJson(String titulo, String descricao, double meta, String tipoArte) throws Exception {
         return objectMapper.writeValueAsString(Map.of(
