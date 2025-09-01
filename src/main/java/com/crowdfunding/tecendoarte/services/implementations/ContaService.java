@@ -1,6 +1,7 @@
 package com.crowdfunding.tecendoarte.services.implementations;
 
 import com.crowdfunding.tecendoarte.dto.ContaDTO.*;
+import com.crowdfunding.tecendoarte.models.Artista;
 import com.crowdfunding.tecendoarte.models.Conta;
 import com.crowdfunding.tecendoarte.models.Usuario;
 import com.crowdfunding.tecendoarte.models.enums.TipoConta;
@@ -20,6 +21,7 @@ public class ContaService implements ContaServiceInterface {
 
     private final ContaRepository contaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ArtistaRepository artistaRepository;
     private final PasswordEncoder passwordEncoder;
 
     public ContaService(
@@ -30,6 +32,7 @@ public class ContaService implements ContaServiceInterface {
         this.contaRepository = contaRepository;
         this.passwordEncoder = passwordEncoder;
         this.usuarioRepository = usuarioRepository;
+        this.artistaRepository = artistaRepository;
     }
 
     @Override
@@ -55,13 +58,12 @@ public class ContaService implements ContaServiceInterface {
                     .interesses(new ArrayList<>())
                     .build();
             usuarioRepository.save(usuario);
-        } /*else if (contaSalva.getTipoConta() == TipoConta.ARTISTA) {
+        } else if (contaSalva.getTipoConta() == TipoConta.ARTISTA) {
             Artista artista = Artista.builder()
-                    .(contaSalva)
-                    .portfolio(new ArrayList<>())
+                    .conta(contaSalva)
                     .build();
             artistaRepository.save(artista);
-        } */
+        }
 
         return toResponseDTO(contaSalva);
     }
@@ -86,7 +88,7 @@ public class ContaService implements ContaServiceInterface {
         if (tipoAnterior != tipoNovo) {
             //excluir entidade antiga, se existir
             if (tipoAnterior == TipoConta.USUARIO) usuarioRepository.findByConta(conta).ifPresent(usuarioRepository::delete);
-            /*if (tipoAnterior == TipoConta.ARTISTA) artistaRepository.findByConta(conta).ifPresent(artistaRepository::delete); */
+            if (tipoAnterior == TipoConta.ARTISTA) artistaRepository.findByContaId(conta.getIdConta()).ifPresent(artistaRepository::delete);
 
             //criar nova entidade se necessário
             if (tipoNovo == TipoConta.USUARIO) {
@@ -95,13 +97,12 @@ public class ContaService implements ContaServiceInterface {
                         .interesses(new ArrayList<>())
                         .build();
                 usuarioRepository.save(usuario);
-            } /*else if (tipoNovo == TipoConta.ARTISTA) {
+            } else if (tipoNovo == TipoConta.ARTISTA) {
                 Artista artista = Artista.builder()
                         .conta(atualizada)
-                        .portfolio(new ArrayList<>())
                         .build();
                 artistaRepository.save(artista);
-            } */
+            }
         }
 
         return toResponseDTO(atualizada);
@@ -115,9 +116,9 @@ public class ContaService implements ContaServiceInterface {
 
         if (conta.getTipoConta() == TipoConta.USUARIO) {
             usuarioRepository.findByConta(conta).ifPresent(usuarioRepository::delete);
-        } /*else if (conta.getTipoConta() == TipoConta.ARTISTA) {
-            artistaRepository.findByConta(conta).ifPresent(artistaRepository::delete);
-        } */
+        } else if (conta.getTipoConta() == TipoConta.ARTISTA) {
+            artistaRepository.findByContaId(conta.getIdConta()).ifPresent(artistaRepository::delete);
+        }
 
         contaRepository.delete(conta);
         return true;
