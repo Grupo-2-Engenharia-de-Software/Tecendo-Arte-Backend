@@ -41,7 +41,7 @@ O gerenciamento das tarefas está sendo feito via **GitHub Projects** com issues
 ### Pré-requisitos
 - Java 21
 - Gradle
-- Docker e Docker Compose (para PostgreSQL)
+- Docker e Docker Compose (para PostgreSQL) - mais em ./README-POSTGRESQL.md
 
 ### Executando a aplicação
 
