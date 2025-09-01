@@ -25,6 +25,7 @@ Isso irá:
 - Expor a porta 5432
 
 ### 2. Verificar se o PostgreSQL está rodando
+Antes de continuar, é crucial verificar se o container do PostgreSQL está no status running.
 
 ```bash
 # Verificar se o container está rodando
@@ -33,6 +34,9 @@ docker ps
 # Verificar logs do container
 docker logs tecendoarte-postgres
 ```
+O resultado deve mostrar o container tecendoarte-postgres com o status Up (running).
+
+Se ele não estiver running, utilize o comando ```docker logs tecendoarte-postgres``` para verificar o que pode ter ocorrido.
 
 ## Comandos úteis
 
