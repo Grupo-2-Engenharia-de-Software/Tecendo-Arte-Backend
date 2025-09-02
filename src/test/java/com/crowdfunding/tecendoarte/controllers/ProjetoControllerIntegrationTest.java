@@ -10,6 +10,7 @@ import com.crowdfunding.tecendoarte.repositories.ArtistaRepository;
 import com.crowdfunding.tecendoarte.repositories.ContaRepository;
 import com.crowdfunding.tecendoarte.repositories.ProjetoRepository;
 import com.crowdfunding.tecendoarte.repositories.UsuarioRepository;
+import com.crowdfunding.tecendoarte.services.implementations.ProjetoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,7 @@ import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 @SpringBootTest
@@ -52,6 +54,9 @@ class ProjetoControllerIntegrationTest {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private ProjetoService projetoService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -143,6 +148,36 @@ class ProjetoControllerIntegrationTest {
     void deveRetornarNotFoundAoBuscarProjetoInexistente() throws Exception {
         mockMvc.perform(get("/projetos/99999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deveListarProjetosComSucesso() throws Exception {
+        Projeto projeto = Projeto.builder()
+                .titulo("Projeto Teste")
+                .descricaoProjeto("Descrição teste")
+                .meta(1000.0)
+                .tipoArte(TipoArte.DESENHO)
+                .artista(artista)
+                .dataCriacao(LocalDate.now())
+                .status(StatusProjeto.AGUARDANDO_AVALIACAO)
+                .valorArrecadado(0.0)
+                .build();
+
+        projeto = projetoRepository.save(projeto);
+
+        mockMvc.perform(get("/projetos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].idProjeto").value(projeto.getIdProjeto()))
+                .andExpect(jsonPath("$[0].titulo").value("Projeto Teste"));
+    }
+
+    @Test
+    void deveRetornar404QuandoNaoExistirProjetosParaListar() throws Exception {
+        projetoRepository.deleteAll();
+
+        mockMvc.perform(get("/projetos"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Nenhum projeto encontrado."));
     }
 
     @Test
