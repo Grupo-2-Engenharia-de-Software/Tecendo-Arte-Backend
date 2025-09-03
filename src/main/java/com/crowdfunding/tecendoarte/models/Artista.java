@@ -22,7 +22,7 @@ public class Artista {
     @JoinColumn(name = "id_conta", referencedColumnName = "idConta", nullable = false, unique = true)
     private Conta conta;
 
-    @Column(name = "descricao_artista", nullable = true, columnDefinition = "TEXT")
+    @Column(name = "descricao_artista", nullable = false, columnDefinition = "TEXT")
     private String descricao;
 
     @Builder.Default

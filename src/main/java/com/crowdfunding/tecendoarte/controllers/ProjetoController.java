@@ -68,32 +68,6 @@ public class ProjetoController {
     }
 
     @Operation(
-        summary = "Listar projetos",
-        description = "Lista todos os projetos.",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Projetos encontrados com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Nenhum projeto encontrado"),
-            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
-        }
-    )
-    @GetMapping
-    public ResponseEntity<?> listarProjetos() {
-        try {
-            List<ProjetoResponseDTO> response = projetoService.listarProjetos();
-            return ResponseEntity
-                    .ok(response);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(e.getMessage());
-        } catch (Exception ex) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ex.getMessage());
-        }
-    }
-
-    @Operation(
         summary = "Atualizar projeto",
         description = "Atualiza os dados de um projeto existente do artista autenticado.",
         responses = {

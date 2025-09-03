@@ -81,18 +81,6 @@ public class ProjetoService implements ProjetoServiceInterface {
         return toResponseDTO(projeto);
     }
 
-    public List<ProjetoResponseDTO> listarProjetos() {
-        List<Projeto> projetos = projetoRepository.findAll();
-
-        if (projetos.isEmpty()) {
-            throw new EntityNotFoundException("Nenhum projeto encontrado.");
-        }
-        
-        return projetos.stream()
-                .map(this::toResponseDTO)
-                .toList();
-    }
-
     private Projeto buscarProjetoPorId(Long idProjeto) {
         return projetoRepository.findById(idProjeto)
                 .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado."));

@@ -61,7 +61,6 @@ public class ContaService implements ContaServiceInterface {
         } else if (contaSalva.getTipoConta() == TipoConta.ARTISTA) {
             Artista artista = Artista.builder()
                     .conta(contaSalva)
-                    .categorias(new ArrayList<>())
                     .build();
             artistaRepository.save(artista);
         }
