@@ -13,8 +13,7 @@ public class ArtistaRequestDTO {
 
     @NotNull(message = "Id da conta obrigatorio!")
     private Long contaId;
-
-    @NotBlank(message = "Descricao obrigatoria!")
+    
     private String descricao;
 
     @NotEmpty(message = "Pelo menos uma categoria deve ser informada.")
