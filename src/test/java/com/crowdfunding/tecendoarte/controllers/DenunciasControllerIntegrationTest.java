@@ -6,9 +6,11 @@ import com.crowdfunding.tecendoarte.models.enums.StatusDenuncia;
 import com.crowdfunding.tecendoarte.models.enums.TipoDenuncia;
 import com.crowdfunding.tecendoarte.models.enums.TipoConta;
 import com.crowdfunding.tecendoarte.repositories.DenunciaRepository;
+import com.crowdfunding.tecendoarte.repositories.ArtistaRepository;
 import com.crowdfunding.tecendoarte.repositories.ContaRepository;
 import com.crowdfunding.tecendoarte.repositories.UsuarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class DenunciasControllerIntegrationTest {
 
@@ -46,6 +49,9 @@ class DenunciasControllerIntegrationTest {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
+    private ArtistaRepository artistaRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     private MockMvc mockMvc;
@@ -53,9 +59,10 @@ class DenunciasControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        denunciaRepository.deleteAll();
         usuarioRepository.deleteAll();
+        artistaRepository.deleteAll();
         contaRepository.deleteAll();
+        denunciaRepository.deleteAll();
 
         contaTeste = Conta.builder()
                 .email("teste@teste.com")

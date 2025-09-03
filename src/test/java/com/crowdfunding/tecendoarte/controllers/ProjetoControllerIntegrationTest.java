@@ -10,7 +10,6 @@ import com.crowdfunding.tecendoarte.repositories.ArtistaRepository;
 import com.crowdfunding.tecendoarte.repositories.ContaRepository;
 import com.crowdfunding.tecendoarte.repositories.ProjetoRepository;
 import com.crowdfunding.tecendoarte.repositories.UsuarioRepository;
-import com.crowdfunding.tecendoarte.services.implementations.ProjetoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,6 @@ import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 @SpringBootTest
@@ -54,9 +52,6 @@ class ProjetoControllerIntegrationTest {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private ProjetoService projetoService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
