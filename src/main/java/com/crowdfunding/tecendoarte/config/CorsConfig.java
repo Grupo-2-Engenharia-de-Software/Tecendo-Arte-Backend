@@ -17,7 +17,7 @@ public class CorsConfig {
                 // ambiente)
                 String allowedOrigin = System.getenv("FRONTEND_URL") != null
                         ? System.getenv("FRONTEND_URL")
-                        : "http://localhost:5173"; // valor padrão p/ desenvolvimento
+                        : "http://localhost:4200";
 
                 registry.addMapping("/**")
                         .allowedOrigins(allowedOrigin)
