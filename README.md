@@ -43,6 +43,16 @@ O gerenciamento das tarefas está sendo feito via **GitHub Projects** com issues
 - Gradle
 - Docker e Docker Compose (para PostgreSQL) - mais em ./README-POSTGRESQL.md
 
+
+### Configuração do Frontend (CORS)
+
+Para que a API possa ser acessada pelo frontend, é necessário configurar a URL de origem. A URL do frontend é configurada através da propriedade **`app.frontend.url`** no arquivo **`src/main/resources/application.properties`**.
+
+Certifique-se de que a propriedade esteja definida com o endereço correto do seu frontend. Por exemplo, para um ambiente de desenvolvimento:
+
+```properties
+app.frontend.url=http://localhost:5173
+
 ### Executando a aplicação
 
 ```bash
