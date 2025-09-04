@@ -3,16 +3,25 @@ package com.crowdfunding.tecendoarte.services.implementations;
 import org.springframework.stereotype.Service;
 import com.crowdfunding.tecendoarte.models.Artista;
 import com.crowdfunding.tecendoarte.models.Conta;
+import com.crowdfunding.tecendoarte.models.Imagem;
 import com.crowdfunding.tecendoarte.models.enums.TipoArte;
 import com.crowdfunding.tecendoarte.repositories.ArtistaRepository;
 import com.crowdfunding.tecendoarte.repositories.ContaRepository;
 import com.crowdfunding.tecendoarte.services.interfaces.ArtistaServiceInterface;
+
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.crowdfunding.tecendoarte.dto.ArtistaDTO.*;
+import com.crowdfunding.tecendoarte.dto.ImagemDTO.ImagemRequestDTO;
+import com.crowdfunding.tecendoarte.dto.ImagemDTO.ImagemResponseDTO;
 import com.crowdfunding.tecendoarte.config.JwtUtil;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -171,4 +180,41 @@ public class ArtistaService implements ArtistaServiceInterface {
         }
     }
 
+    @Transactional
+    public void adicionarImagensAoPerfil(Long idArtista, List<ImagemRequestDTO> imagensDto) {
+        Artista artista = artistaRepository.findById(idArtista)
+            .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
+        for (ImagemRequestDTO dto : imagensDto) {
+            byte[] dadosImagem = Base64.getDecoder().decode(dto.getDadosImagemBase64());
+            Imagem imagem = Imagem.builder()
+                .dadosImagem(dadosImagem)
+                .descricao(dto.getDescricao())
+                .artista(artista)
+                .build();
+            artista.getImagensPortifolio().add(imagem);
+        }
+        artistaRepository.save(artista);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ImagemResponseDTO> listarImagensPortifolio(Long idArtista) {
+        Artista artista = artistaRepository.findById(idArtista)
+            .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."));
+        return artista.getImagensPortifolio().stream()
+            .map(imagem -> ImagemResponseDTO.builder()
+                .idImagem(imagem.getIdImagem())
+                .dadosImagemBase64(Base64.getEncoder().encodeToString(imagem.getDadosImagem())) // CORRIGIDO AQUI
+                .descricao(imagem.getDescricao())
+                .projetoId(imagem.getProjeto() != null ? imagem.getProjeto().getIdProjeto() : null)
+                .build())
+            .toList();
+    }
+
+    public Long getIdArtistaAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) authentication.getPrincipal();
+        return artistaRepository.findByContaEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Artista não encontrado."))
+                .getId();
+    }
 }
