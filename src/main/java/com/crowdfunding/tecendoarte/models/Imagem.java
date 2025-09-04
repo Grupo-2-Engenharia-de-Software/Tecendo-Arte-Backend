@@ -15,13 +15,18 @@ public class Imagem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idImagem;
 
-    @Column(name = "url_imagem", nullable = false, length = 1000)
-    private String urlImagem;
+    @Lob
+    @Column(name = "dados_imagem", nullable = false)
+    private byte[] dadosImagem; // Conteúdo binário da imagem
 
     @Column(name = "descricao", length = 500)
     private String descricao;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_projeto", nullable = false)
+    @JoinColumn(name = "id_projeto")
     private Projeto projeto;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_artista")
+    private Artista artista;
 }

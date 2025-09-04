@@ -1,11 +1,17 @@
 package com.crowdfunding.tecendoarte.controllers;
 
 import org.springframework.web.bind.annotation.*;
-import com.crowdfunding.tecendoarte.dto.ArtistaDTO.ArtistaRequestDTO;
+
 import com.crowdfunding.tecendoarte.services.implementations.ArtistaService;
 import jakarta.validation.Valid;
+
+import java.util.List;
+
 import org.springframework.http.*;
 import com.crowdfunding.tecendoarte.dto.ArtistaDTO.*;
+import com.crowdfunding.tecendoarte.dto.ImagemDTO.ImagemRequestDTO;
+import com.crowdfunding.tecendoarte.dto.ImagemDTO.ImagemResponseDTO;
+
 import jakarta.persistence.EntityNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -222,5 +228,41 @@ public class ArtistaController {
                     .body(e.getMessage());
         }
     }
-    
+
+    @Operation(
+        summary = "Adicionar imagens ao portfólio do artista",
+        description = "Permite que o artista autenticado envie uma ou mais imagens para seu portfólio. As imagens devem ser enviadas em base64.",
+        security = @SecurityRequirement(name = "bearerAuth"),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Imagens adicionadas ao portfólio com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "401", description = "Credenciais inválidas"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+        }
+    )
+
+    @PostMapping("/perfil/imagens")
+    public ResponseEntity<?> adicionarImagensAoPerfil(@RequestBody List<ImagemRequestDTO> imagensDto) {
+        Long idArtistaAutenticado = artistaService.getIdArtistaAutenticado();
+        artistaService.adicionarImagensAoPerfil(idArtistaAutenticado, imagensDto);
+        return ResponseEntity.ok("Imagens adicionadas ao portfólio com sucesso.");
+    }
+
+    @Operation(
+        summary = "Listar imagens do portfólio do artista",
+        description = "Retorna todas as imagens do portfólio do artista autenticado.",
+        security = @SecurityRequirement(name = "bearerAuth"),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de imagens retornada com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Credenciais inválidas"),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+        }
+    )
+
+    @GetMapping("/perfil/imagens")
+    public ResponseEntity<List<ImagemResponseDTO>> listarImagensPortifolio() {
+        Long idArtistaAutenticado = artistaService.getIdArtistaAutenticado();
+        List<ImagemResponseDTO> imagens = artistaService.listarImagensPortifolio(idArtistaAutenticado);
+        return ResponseEntity.ok(imagens);
+    }
 }

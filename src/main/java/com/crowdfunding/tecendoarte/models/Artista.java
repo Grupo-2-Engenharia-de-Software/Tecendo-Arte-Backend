@@ -36,4 +36,7 @@ public class Artista {
     @OneToMany(mappedBy = "artista", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Projeto> projetos = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "artista", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Imagem> imagensPortifolio = new ArrayList<>();
 }
